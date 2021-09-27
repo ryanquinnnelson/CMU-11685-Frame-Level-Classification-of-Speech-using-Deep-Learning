@@ -13,11 +13,8 @@ import octopus.handlers.modelhandler as mh
 import octopus.handlers.criterionhandler as ch
 import octopus.handlers.optimizerhandler as oh
 import octopus.handlers.schedulerhandler as sh
-
 import customized.datasets as datasets
 
-
-# import octopus.trainer as trainer
 
 
 class Octopus:

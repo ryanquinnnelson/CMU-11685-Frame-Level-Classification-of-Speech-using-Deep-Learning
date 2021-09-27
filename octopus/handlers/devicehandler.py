@@ -1,5 +1,5 @@
 """
-All things device-wise.
+All things related to device.
 """
 
 import logging
@@ -13,10 +13,8 @@ class DeviceHandler:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         if self.device.type == 'cuda':
-            logging.info('gpu is available.')
             logging.info(f'device is {self.device}.')
         else:
-            logging.info('gpu is not available.')
             logging.info(f'device is {self.device}.')
 
     def get_device(self):

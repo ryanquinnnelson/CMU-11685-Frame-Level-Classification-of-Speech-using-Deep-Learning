@@ -1,6 +1,8 @@
 """
 All things related to schedulers.
+"""
 
+"""
 StepLR: Decays the learning rate of each parameter group by gamma every step_size epochs
 - step_size
 - gamma
@@ -20,22 +22,22 @@ import torch.optim as optim
 
 class SchedulerHandler:
 
-    def __init__(self, scheduler_type, args_dict):
+    def __init__(self, scheduler_type, scheduler_kwargs):
         self.scheduler_type = scheduler_type
-        self.args_dict = args_dict
+        self.scheduler_kwargs = scheduler_kwargs
 
     def get_scheduler(self, optimizer):
         scheduler = None
 
         if self.scheduler_type == 'StepLR':
-            scheduler = optim.lr_scheduler.StepLR(optimizer, **self.args_dict)
+            scheduler = optim.lr_scheduler.StepLR(optimizer, **self.scheduler_kwargs)
 
         elif self.scheduler_type == 'MultiStepLR':
 
-            scheduler = optim.lr_scheduler.MultiStepLR(optimizer, **self.args_dict)
+            scheduler = optim.lr_scheduler.MultiStepLR(optimizer, **self.scheduler_kwargs)
 
         elif self.scheduler_type == 'ReduceLROnPlateau':
-            scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, **self.args_dict)
+            scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, **self.scheduler_kwargs)
 
         return scheduler
 

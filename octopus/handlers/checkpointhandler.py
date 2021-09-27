@@ -1,5 +1,5 @@
 """
-All things related to saving and loading model checkpoints.
+All things related to model checkpoints.
 """
 
 import os

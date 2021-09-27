@@ -15,7 +15,7 @@ class DataHandler:
     def __init__(self,
                  run_name,
                  data_dir,
-                 out_dir,
+                 output_dir,
                  train_data_file,
                  train_label_file,
                  val_data_file,
@@ -29,7 +29,7 @@ class DataHandler:
 
         self.run_name = run_name
         self.data_dir = data_dir
-        self.out_dir = out_dir
+        self.output_dir = output_dir
         self.train_data_file = os.path.join(data_dir, train_data_file)
         self.train_label_file = os.path.join(data_dir, train_label_file)
         self.val_data_file = os.path.join(data_dir, val_data_file)
@@ -46,8 +46,8 @@ class DataHandler:
         self.dataset_args_dict = dataset_args_dict
 
     def setup(self):
-        if not os.path.isdir(self.out_dir):
-            os.mkdir(self.out_dir)
+        if not os.path.isdir(self.output_dir):
+            os.mkdir(self.output_dir)
 
     def train_dataset(self, dataset_class):
 
@@ -116,10 +116,10 @@ class DataHandler:
 
         # generate filename
         filename = self.run_name + '.' + datetime.now().strftime("%Y%m%d.%H.%M.%S") + '.output.csv'
-        path = os.path.join(self.out_dir, filename)
+        path = os.path.join(self.output_dir, filename)
 
         # save output
         df = pd.DataFrame(data=out, index=False)
         df.to_csv(path)
 
-        logging.info(f'Saved results in:{path}.')
+        logging.info(f'Saved output in:{path}.')

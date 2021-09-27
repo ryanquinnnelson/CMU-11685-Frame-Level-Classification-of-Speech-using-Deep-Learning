@@ -1,5 +1,5 @@
 """
-Handles setting up criterion.
+All things related to criterion.
 """
 
 import torch.nn as nn

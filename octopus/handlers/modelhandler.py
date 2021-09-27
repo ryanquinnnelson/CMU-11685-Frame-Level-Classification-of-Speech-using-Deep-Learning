@@ -1,5 +1,5 @@
 """
-Builds models.
+All things related to models.
 """
 from octopus.models.MLP import MLP
 
