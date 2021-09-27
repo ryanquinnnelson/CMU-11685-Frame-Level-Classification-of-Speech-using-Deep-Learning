@@ -10,8 +10,8 @@ import pipeline.wandbconnector as wandbconnector
 import pipeline.datahandler as datadealer
 import pipeline.devicehandler as devicedealer
 import pipeline.checkpointer as checkpointer
-import pipeline.modeler as modeler
-import pipeline.componentdealer as componentdealer
+import pipeline.models as modeler
+import pipeline.components as componentdealer
 import pipeline.trainer as trainer
 import customized.datasets as datasets
 
@@ -61,7 +61,7 @@ def main():
         # update scheduler
         componentdealer.update_scheduler(scheduler,
                                          config['hyperparameters']['scheduler_type'],
-                                         config['hyperparameters']['scheduler_plateau_metric'],
+                                         config['hyperparameters']['scheduler_plateau_metric'][-1],
                                          stats)
 
         # save model in case of issues

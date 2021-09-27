@@ -52,9 +52,8 @@ def set_scheduler(scheduler_type, optimizer, **kwargs):
     return scheduler
 
 
-def update_scheduler(scheduler, scheduler_type, plateau_metric, stats):
+def update_scheduler(scheduler, scheduler_type, plateau_metric):
     if scheduler_type == 'ReduceLROnPlateau':
-        metric = stats[plateau_metric][-1]  # latest value
-        scheduler.step(metric)
+        scheduler.step(plateau_metric)
     else:
         scheduler.step()
