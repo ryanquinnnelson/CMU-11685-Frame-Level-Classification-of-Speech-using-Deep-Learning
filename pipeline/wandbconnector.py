@@ -6,8 +6,8 @@ import subprocess
 
 
 class WandbConnector:
-    def __init__(self, name, project, notes, tags, config):
-        self.name = name
+    def __init__(self, run_name, project, notes, tags, config):
+        self.run_name = run_name
         self.project = project
         self.notes = notes
         self.tags = tags
@@ -18,7 +18,7 @@ class WandbConnector:
 
         _install()
         _login()
-        wandb_config = _initialize(self.name, self.project, self.notes, self.tags, self.config)
+        wandb_config = _initialize(self.run_name, self.project, self.notes, self.tags, self.config)
 
         logging.info('wandb is set up.')
 
