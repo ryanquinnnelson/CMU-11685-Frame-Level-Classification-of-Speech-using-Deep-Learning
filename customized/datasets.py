@@ -108,7 +108,7 @@ def convert_output(out):
     return out
 
 
-def calculate_n_hits(out, actual):
+def acc_func(out, actual):
     """
     out: 2D tensor (torch.FloatTensor), each row has 71 columns (one for each possible label)
     actual: 1D tensor (torch.LongTensor)

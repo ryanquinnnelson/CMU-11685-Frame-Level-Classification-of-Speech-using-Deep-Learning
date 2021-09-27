@@ -10,7 +10,7 @@ class CriterionHandler:
     def __init__(self, criterion_type):
         self.criterion_type = criterion_type
 
-    def get_criterion(self):
+    def get_loss_function(self):
         criterion = None
         if self.criterion_type == 'CrossEntropyLoss':
             criterion = nn.CrossEntropyLoss()

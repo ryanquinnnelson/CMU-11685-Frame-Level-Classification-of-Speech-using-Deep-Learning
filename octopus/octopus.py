@@ -126,7 +126,7 @@ class Octopus:
         self.wandbconnector.watch(model)
 
         # initialize model components
-        criterion_func = self.criterionhandler.get_criterion()
+        loss_func = self.criterionhandler.get_loss_function()
         optimizer = self.optimizerhandler.get_optimizer(model)
         scheduler = self.schedulerhandler.get_scheduler(optimizer)
 
@@ -137,8 +137,8 @@ class Octopus:
 
         # train and test model
         self.traininghandler.run_training_epochs(train_loader, val_loader, test_loader, model, optimizer, scheduler,
-                                                 criterion_func,
-                                                 datasets.calculate_n_hits, datasets.convert_output, self.datahandler,
+                                                 loss_func,
+                                                 datasets.acc_func, datasets.convert_output, self.datahandler,
                                                  self.devicehandler, self.checkpointhandler,
                                                  self.schedulerhandler, self.wandbconnector)
 

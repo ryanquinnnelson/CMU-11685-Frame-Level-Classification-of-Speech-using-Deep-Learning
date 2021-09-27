@@ -49,7 +49,7 @@ def train_model(train_loader, model, criterion_func, devicehandler, optimizer):
     return train_loss
 
 
-def evaluate_model(val_loader, model, criterion_func, devicehandler, hit_func):
+def evaluate_model(val_loader, model, loss_func, devicehandler, acc_func):
     logging.info('Evaluating model...')
     val_loss = 0
     hits = 0
@@ -68,12 +68,12 @@ def evaluate_model(val_loader, model, criterion_func, devicehandler, hit_func):
             out = model.forward(inputs)
 
             # calculate validation loss
-            loss = criterion_func(out, targets)
+            loss = loss_func(out, targets)
             val_loss += loss.item()
 
             # calculate number of accurate predictions for this batch
             out = out.cpu().detach().numpy()  # extract from gpu
-            hits += hit_func(out, targets)
+            hits += acc_func(out, targets)
 
             # delete mini-batch from device
             del inputs
@@ -193,8 +193,8 @@ class TrainingHandler:
             self.stats['max_val_acc'] = val_acc
             self.stats['max_val_acc_epoch'] = epoch
 
-    def run_training_epochs(self, train_loader, val_loader, test_loader, model, optimizer, scheduler, criterion_func,
-                            hit_func, conversion_func,
+    def run_training_epochs(self, train_loader, val_loader, test_loader, model, optimizer, scheduler, loss_func,
+                            acc_func, conversion_func,
                             datahandler, devicehandler, checkpointhandler, schedulerhandler, wandbconnector):
 
         # load checkpoint if necessary
@@ -207,10 +207,10 @@ class TrainingHandler:
             start = time.time()
 
             # train
-            train_loss = train_model(train_loader, model, criterion_func, devicehandler, optimizer)
+            train_loss = train_model(train_loader, model, loss_func, devicehandler, optimizer)
 
             # validate
-            val_loss, val_acc = evaluate_model(val_loader, model, criterion_func, devicehandler, hit_func)
+            val_loss, val_acc = evaluate_model(val_loader, model, loss_func, devicehandler, acc_func)
 
             # test
             out = test_model(test_loader, model, devicehandler)
