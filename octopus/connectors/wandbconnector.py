@@ -25,7 +25,7 @@ class WandbConnector:
 
     def watch(self, model):
         import wandb
-        wandb.watch(model)
+        wandb.watch(model) # log the network weight histograms
 
     def log_stats(self, stats_dict):
         import wandb

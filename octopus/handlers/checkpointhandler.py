@@ -23,7 +23,7 @@ class CheckpointHandler:
         _create_directory(self.checkpoint_dir)
         logging.info('Checkpoint directory set up.')
 
-    def save(self, model, optimizer, scheduler, next_epoch, **kwargs):
+    def save(self, model, optimizer, scheduler, next_epoch, stats):
         logging.info('Saving checkpoint...')
 
         # build state dictionary
@@ -32,25 +32,22 @@ class CheckpointHandler:
             'optimizer_state_dict': optimizer.state_dict(),
             'scheduler_state_dict': scheduler.state_dict(),
             'next_epoch': next_epoch,
+            'stats': stats
         }
-
-        # append additional arguments to checkpoint dictionary
-        checkpoint.update(kwargs)
 
         # save file
         filename = os.path.join(self.checkpoint_dir, f'{self.run_name}.checkpoint.{next_epoch - 1}.pt')
         torch.save(checkpoint, filename)
         logging.info(f'Saved checkpoint to {filename}.')
 
-    def load(self, filename, device, model, optimizer, scheduler=None):
+    def load(self, filename, device, model, optimizer, scheduler):
         logging.info(f'Loading checkpoint from {filename}...')
         checkpoint = torch.load(filename, map_location=device)
 
         # reload saved states
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        if scheduler:
-            scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+        scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
 
         logging.info('Checkpoint loaded.')
 

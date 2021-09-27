@@ -1,7 +1,6 @@
 import logging
 import os
 import sys
-import time
 
 # local modules
 import octopus.connectors.kaggleconnector as kc
@@ -13,8 +12,8 @@ import octopus.handlers.modelhandler as mh
 import octopus.handlers.criterionhandler as ch
 import octopus.handlers.optimizerhandler as oh
 import octopus.handlers.schedulerhandler as sh
+import octopus.handlers.traininghandler as th
 import customized.datasets as datasets
-
 
 
 class Octopus:
@@ -85,6 +84,15 @@ class Octopus:
         self.schedulerhandler = sh.SchedulerHandler(config['hyperparameters']['scheduler_type'],
                                                     _to_dict(config['hyperparameters']['scheduler_kwargs']))
 
+        # training
+        if config.has_option('checkpoint', 'checkpoint_file'):
+            checkpoint_file = config['checkpoint']['checkpoint_file']
+        else:
+            checkpoint_file = None
+        self.traininghandler = th.TrainingHandler(config['checkpoint'].getboolean('load_from_checkpoint'),
+                                                  config['hyperparameters'].getint('num_epochs'),
+                                                  checkpoint_file)
+
     def setup_environment(self):
         logging.info('Setting up environment...')
 
@@ -127,72 +135,26 @@ class Octopus:
                                                                       datasets.TestDataset,
                                                                       self.devicehandler.get_device())
 
+        # load checkpoint if necessary
+        self.traininghandler.load_checkpoint_if_necessary(self.devicehandler,
+                                                          self.checkpointhandler,
+                                                          model,
+                                                          optimizer,
+                                                          scheduler)
 
+        # run training epochs
+        self.traininghandler.run_training_epochs(train_loader, val_loader, model, optimizer, scheduler, criterion_func,
+                                                 datasets.calculate_n_hits, self.devicehandler, self.checkpointhandler,
+                                                 self.schedulerhandler, self.wandbconnector)
+
+        # test model
+        out = self.traininghandler.test_model(test_loader, model, self.devicehandler)
+        predictions = datasets.convert_to_class_labels(out)
+        self.datahandler.save(out)
 
         logging.info('Deep learning pipeline finished running.')
 
 
-#
-#     wandb.run.summary['best_accuracy'] = val_acc
-#
-#
-# wandb.run.summary['best_epoch'] = epoch
-#
-#     # 1 - setup
-
-
-#
-#     # 2 - training
-#     # setup tracking variables and early stopping criteria
-#     stats = {'max_val_acc': 0, 'first_epoch': 1, 'train_loss': [], 'val_acc': [], 'val_loss': [], 'runtime': []}
-#     _load_checkpoint_if_necessary(model, optimizer, scheduler, config, stats, device)
-#
-#     # run epochs
-#     for epoch in range(stats['first_epoch'], config['hyperparameters'].getint('num_epochs') + 1):
-#         # record start time
-#         start = time.time()
-#
-#         # train
-#         train_loss = trainer.train_model(train_loader, model, optimizer, criterion_func, device)
-#
-#         # validate
-#         val_acc, val_loss = trainer.evaluate_model_on_accuracy(val_loader,
-#                                                                model,
-#                                                                criterion_func,
-#                                                                device,
-#                                                                datasets.calculate_n_hits)
-#
-#         # collect stats
-#         end = time.time()
-#         _stats_collection(stats, epoch, train_loss, val_acc, val_loss, start, end)
-#
-#         # update scheduler
-#         componentdealer.update_scheduler(scheduler,
-#                                          config['hyperparameters']['scheduler_type'],
-#                                          config['hyperparameters']['scheduler_plateau_metric'][-1],
-#                                          stats)
-#
-#         # save model in case of issues
-#         checkpointer.save_checkpoint(model,
-#                                      optimizer,
-#                                      scheduler,
-#                                      epoch + 1,
-#                                      stats['max_val_acc'],
-#                                      config['checkpoint']['checkpoint_dir'],
-#                                      config['wandb']['name'])
-#
-#         # check if early stopping criteria is met
-#         if trainer.perform_early_stop(stats):
-#             break  # stop running epochs
-#
-#     # 3 - test model
-#     out = trainer.test_model(test_loader, model, device)
-#     predictions = datasets.convert_to_class_labels(out)
-#     octopus.datahandler.save(predictions,
-#                               config['wandb']['name'],
-#                               config['DEFAULT']['results_dir'])
-#
-#
 def _to_dict(s):
     d = dict()
 
@@ -229,62 +191,3 @@ def _setup_logging(debug_file):
                         format="%(asctime)s [%(levelname)s] %(message)s",
                         handlers=[logging.FileHandler(debug_file), logging.StreamHandler(sys.stdout)]
                         )
-
-    # # watch model
-    # wandbconnector.watch(model)  # log the network weight histograms
-
-
-def _setup_data(config, device, data_dir):
-    dh =
-
-    dataset_dict =
-
-    return train_loader, val_loader, test_loader
-
-#
-#
-# def _load_checkpoint_if_necessary(model, optimizer, scheduler, config, stats, device):
-#     if config['checkpoint'].getboolean('load_from_checkpoint'):
-#         checkpoint = checkpointer.load_checkpoint(model,
-#                                                   optimizer,
-#                                                   scheduler,
-#                                                   config['checkpoint']['checkpoint_file'],
-#                                                   device)
-#         stats['first_epoch'] = checkpoint['next_epoch']
-#         stats['max_val_acc'] = checkpoint['max_val_acc']
-#
-#
-# def _append_stats(stats, key, val):
-#     stats[key].append(val)
-#
-#
-# def _update_stats(stats, key, val):
-#     if val > stats[key]:
-#         stats[key] = val
-#
-#
-# def _stats_collection(stats, epoch, train_loss, val_acc, val_loss, start, end):
-#     # calculate runtime
-#     runtime = end - start
-#
-#     # save model to wandb if it is better than previous versions
-#     if val_acc > stats['max_val_acc']:
-#         wandbconnector.update_best_model(epoch, val_acc)
-#
-#     # update stats
-#     _append_stats(stats, 'val_acc', val_acc)
-#     _append_stats(stats, 'val_loss', val_loss)
-#     _append_stats(stats, 'train_loss', train_loss)
-#     _append_stats(stats, 'runtime', runtime)
-#     _update_stats(stats, 'max_val_acc', val_acc)
-#
-#     # build stats dictionary of current epoch only
-#     epoch_stats = {'val_acc': stats['val_acc'][-1],
-#                    'val_loss': stats['val_loss'][-1],
-#                    'train_loss': stats['train_loss'][-1],
-#                    'runtime': stats['runtime'][-1],
-#                    'epoch': epoch}
-#
-#     # save epoch stats to wandb
-#     wandbconnector.log_stats(epoch_stats)
-#     logging.info(epoch_stats)
