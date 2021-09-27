@@ -1,15 +1,42 @@
+"""
+All things related to wandb.
+"""
 import logging
 import subprocess
 
 
-def setup(name, project, notes, tags, config):
-    logging.info('Setting up wandb...')
-    _install()
-    _login()
-    wandb_config = _initialize(name, project, notes, tags, config)
-    logging.info('wandb is set up.')
+class WandbConnector:
+    def __init__(self, name, project, notes, tags, config):
+        self.name = name
+        self.project = project
+        self.notes = notes
+        self.tags = tags
+        self.config = config
 
-    return wandb_config
+    def setup(self):
+        logging.info('Setting up wandb...')
+
+        _install()
+        _login()
+        wandb_config = _initialize(self.name, self.project, self.notes, self.tags, self.config)
+
+        logging.info('wandb is set up.')
+
+        return wandb_config
+
+    def watch(self, model):
+        import wandb
+        wandb.watch(model)
+
+    def log_stats(self, stats_dict):
+        import wandb
+        wandb.log(stats_dict)
+
+    def update_best_model(self, updates_dict):
+        import wandb
+
+        for key, value in updates_dict.items():
+            wandb.run.summary[key] = value
 
 
 def _install():
@@ -44,19 +71,3 @@ def _initialize(name, project, notes, tags, config):
     logging.info('wandb is initialized.')
 
     return wandb.config
-
-
-def watch(model):
-    import wandb
-    wandb.watch(model)
-
-
-def log_stats(stats):
-    import wandb
-    wandb.log(stats)
-
-
-def update_best_model(epoch, val_acc):
-    import wandb
-    wandb.run.summary['best_accuracy'] = val_acc
-    wandb.run.summary['best_epoch'] = epoch
