@@ -25,11 +25,13 @@ class DataHandler:
                  batch_size,
                  num_workers,
                  pin_memory,
-                 dataset_args_dict):
+                 dataset_kwargs):
 
         self.run_name = run_name
         self.data_dir = data_dir
         self.output_dir = output_dir
+
+        # fully-qualified file names
         self.train_data_file = os.path.join(data_dir, train_data_file)
         self.train_label_file = os.path.join(data_dir, train_label_file)
         self.val_data_file = os.path.join(data_dir, val_data_file)
@@ -40,30 +42,32 @@ class DataHandler:
         else:
             self.test_label_file = None
 
+        # parameters
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.pin_memory = pin_memory
-        self.dataset_args_dict = dataset_args_dict
+        self.dataset_kwargs = dataset_kwargs
 
     def setup(self):
-        if not os.path.isdir(self.output_dir):
-            os.mkdir(self.output_dir)
+        logging.info('Setting up output directory...')
+        _create_directory(self.output_dir)
+        logging.info('Output directory is set up.')
 
     def train_dataset(self, dataset_class):
 
-        ds = dataset_class(self.train_data_file, self.train_label_file, **self.dataset_args_dict)
+        ds = dataset_class(self.train_data_file, self.train_label_file, **self.dataset_kwargs)
         logging.info(f'Loaded {ds.length} records as training data.')
         return ds
 
     def val_dataset(self, dataset_class):
 
-        ds = dataset_class(self.val_data_file, self.val_label_file, **self.dataset_args_dict)
+        ds = dataset_class(self.val_data_file, self.val_label_file, **self.dataset_kwargs)
         logging.info(f'Loaded {ds.length} records as validation data.')
         return ds
 
     def test_dataset(self, dataset_class):
 
-        ds = dataset_class(self.test_data_file, self.test_label_file, **self.dataset_args_dict)
+        ds = dataset_class(self.test_data_file, self.test_label_file, **self.dataset_kwargs)
         logging.info(f'Loaded {ds.length} records as test data.')
         return ds
 
@@ -124,3 +128,11 @@ class DataHandler:
         df.to_csv(path)
 
         logging.info(f'Saved output in:{path}.')
+
+
+def _create_directory(path):
+    if os.path.isdir(path):
+        logging.info(f'Directory already exists:{path}.')
+    else:
+        os.mkdir(path)
+        logging.info(f'Created directory:{path}.')

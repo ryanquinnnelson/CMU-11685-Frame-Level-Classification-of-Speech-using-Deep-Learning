@@ -66,8 +66,6 @@ class MLP(nn.Module):
                  batch_norm):
         super(MLP, self).__init__()
 
-        logging.info('Initializing model...')
-
         # set layer sizes
         sizes = [input_size] + hidden_layer_sizes + [output_size]
 
@@ -76,9 +74,6 @@ class MLP(nn.Module):
 
         # build Sequential model from sequence
         self.model = nn.Sequential(OrderedDict(sequence))
-
-        logging.info('Model initialized.')
-        logging.info(f'\n{self.model}')
 
     def forward(self, x):
         return self.model(x)  # self.layers(x) also works

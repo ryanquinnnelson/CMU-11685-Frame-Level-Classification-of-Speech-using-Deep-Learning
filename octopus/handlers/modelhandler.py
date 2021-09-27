@@ -1,6 +1,8 @@
 """
 All things related to models.
 """
+import logging
+
 from octopus.models.MLP import MLP
 
 
@@ -22,6 +24,7 @@ class ModelHandler:
         self.batch_norm = batch_norm
 
     def get_model(self):
+        logging.info('Initializing model...')
         model = None
         if self.model_type == 'MLP':
             model = MLP(self.input_size,
@@ -30,5 +33,6 @@ class ModelHandler:
                         self.activation_func,
                         self.dropout_rate,
                         self.batch_norm)
-
+        logging.info('Model initialized.')
+        logging.info(f'\n{model}')
         return model

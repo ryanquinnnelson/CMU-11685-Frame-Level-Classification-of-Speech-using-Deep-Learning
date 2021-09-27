@@ -21,7 +21,7 @@ class CheckpointHandler:
             _delete_directory(self.checkpoint_dir)
 
         _create_directory(self.checkpoint_dir)
-        logging.info('Checkpoint directory set up.')
+        logging.info('Checkpoint directory is set up.')
 
     def save(self, model, optimizer, scheduler, next_epoch, stats):
         logging.info('Saving checkpoint...')

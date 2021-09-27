@@ -135,15 +135,12 @@ class Octopus:
                                                                       datasets.TrainValDataset, datasets.TestDataset,
                                                                       self.devicehandler)
 
-        # train model
-        self.traininghandler.run_training_epochs(train_loader, val_loader, model, optimizer, scheduler, criterion_func,
-                                                 datasets.calculate_n_hits, self.devicehandler, self.checkpointhandler,
+        # train and test model
+        self.traininghandler.run_training_epochs(train_loader, val_loader, test_loader, model, optimizer, scheduler,
+                                                 criterion_func,
+                                                 datasets.calculate_n_hits, datasets.convert_output, self.datahandler,
+                                                 self.devicehandler, self.checkpointhandler,
                                                  self.schedulerhandler, self.wandbconnector)
-
-        # test model
-        out = self.traininghandler.test_model(test_loader, model, self.devicehandler)
-        out = datasets.convert_output(out)
-        self.datahandler.save(out)
 
         logging.info('Deep learning pipeline finished running.')
 
