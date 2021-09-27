@@ -1,11 +1,9 @@
 import logging
-from datetime import datetime
-import os
 
 import torch
 import numpy as np
 
-import pipeline.devicehandler as devicedealer
+import pipeline.devicehandler as dh
 
 
 def train_model(train_loader, model, optimizer, criterion_func, device):
@@ -20,7 +18,7 @@ def train_model(train_loader, model, optimizer, criterion_func, device):
         # prep
         optimizer.zero_grad()
         torch.cuda.empty_cache()
-        inputs, targets = devicedealer.move_data_to_device(device, inputs, model, targets)
+        inputs, targets = dh.move_data_to_device(device, model, inputs, targets)
 
         # compute forward pass
         out = model.forward(inputs)
@@ -42,11 +40,11 @@ def train_model(train_loader, model, optimizer, criterion_func, device):
     # calculate average loss across all mini-batches
     training_loss /= len(train_loader)
 
-    logging.info('Training is finished.')
+    logging.info('Training iteration is finished.')
     return training_loss
 
 
-def evaluate_model(val_loader, model, criterion_func, device, hit_func):
+def evaluate_model_on_accuracy(val_loader, model, criterion_func, device, hit_func):
     logging.info('Evaluating model...')
     training_loss = 0
     hits = 0
@@ -59,7 +57,7 @@ def evaluate_model(val_loader, model, criterion_func, device, hit_func):
         # process mini-batches
         for (inputs, targets) in val_loader:
             # prep
-            inputs, targets = devicedealer.move_data_to_device(device, inputs, model, targets)
+            inputs, targets = dh.move_data_to_device(device, model, inputs, targets)
 
             # forward pass
             out = model.forward(inputs)
@@ -76,11 +74,11 @@ def evaluate_model(val_loader, model, criterion_func, device, hit_func):
             del inputs
             del targets
 
-        # calculate eval metrics
+        # calculate evaluation metrics
         training_loss /= len(val_loader)  # average per mini-batch
         hits /= len(val_loader.dataset)  # global accuracy
 
-        logging.info('Evaluation is finished.')
+        logging.info('Evaluation iteration is finished.')
         return hits, training_loss
 
 
@@ -94,9 +92,19 @@ def test_model(test_loader, model, device):
         model.eval()
 
         # process mini-batches
-        for inputs in test_loader:
+        for batch in test_loader:
+
+            if type(batch) is tuple:
+                # loader contains inputs and targets
+                inputs = batch[0]
+                targets = batch[1]
+            else:
+                # loader contains only inputs
+                inputs = batch
+                targets = None
+
             # prep
-            inputs, targets = devicedealer.move_data_to_device(device, inputs, model, targets=None)
+            inputs, targets = dh.move_data_to_device(device, model, inputs, targets)
 
             # forward pass
             out = model.forward(inputs)
@@ -109,20 +117,14 @@ def test_model(test_loader, model, device):
     return np.concatenate(output, axis=0)
 
 
-def save_results(predictions, name, results_dir):
-    filename = name + '.' + datetime.now().strftime("%Y%m%d.%H.%M.%S.") + 'results.csv'
-
-    if not os.path.isdir(results_dir):
-        os.mkdir(results_dir)
-
-    path = os.path.join(results_dir, filename)
-    np.savetxt(path, predictions, delimiter=',', fmt='%.0f')
-    logging.info(f'Saved results in:{path}.')
-
-
 def perform_early_stop(stats):
     logging.info('Checking early stopping criteria...')
 
-    perform_early_stop = False
+    stopping_criteria_met = False
 
-    return perform_early_stop
+    if stopping_criteria_met:
+        logging.info('Early stopping criteria is met.')
+    else:
+        logging.info('Early stopping criteria is not met.')
+
+    return stopping_criteria_met

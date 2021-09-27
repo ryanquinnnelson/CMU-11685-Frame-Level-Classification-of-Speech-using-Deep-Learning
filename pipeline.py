@@ -5,6 +5,7 @@ import os
 import time
 
 # local modules
+import pipeline.datahandler
 import pipeline.kaggleconnector as kaggleconnector
 import pipeline.wandbconnector as wandbconnector
 import pipeline.datahandler as datadealer
@@ -48,11 +49,11 @@ def main():
         train_loss = trainer.train_model(train_loader, model, optimizer, criterion_func, device)
 
         # validate
-        val_acc, val_loss = trainer.evaluate_model(val_loader,
-                                                   model,
-                                                   criterion_func,
-                                                   device,
-                                                   datasets.calculate_n_hits)
+        val_acc, val_loss = trainer.evaluate_model_on_accuracy(val_loader,
+                                                               model,
+                                                               criterion_func,
+                                                               device,
+                                                               datasets.calculate_n_hits)
 
         # collect stats
         end = time.time()
@@ -80,9 +81,9 @@ def main():
     # 3 - test model
     out = trainer.test_model(test_loader, model, device)
     predictions = datasets.convert_to_class_labels(out)
-    trainer.save_results(predictions,
-                         config['wandb']['name'],
-                         config['DEFAULT']['results_dir'])
+    pipeline.datahandler.save(predictions,
+                              config['wandb']['name'],
+                              config['DEFAULT']['results_dir'])
 
 
 def _to_dict(s):

@@ -4,14 +4,19 @@ All things related to data reading and writing.
 
 import os
 import logging
+from datetime import datetime
 
+import numpy as np
+import pandas as pd
 from torch.utils.data import DataLoader
 
 
 class DataDealer:
 
     def __init__(self,
+                 run_name,
                  data_dir,
+                 out_dir,
                  train_data_file,
                  train_label_file,
                  val_data_file,
@@ -22,7 +27,9 @@ class DataDealer:
                  num_workers=0,
                  pin_memory=False):
 
+        self.run_name = run_name
         self.data_dir = data_dir
+        self.out_dir = out_dir
         self.train_data_file = os.path.join(data_dir, train_data_file)
         self.train_label_file = os.path.join(data_dir, train_label_file)
         self.val_data_file = os.path.join(data_dir, val_data_file)
@@ -36,6 +43,10 @@ class DataDealer:
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.pin_memory = pin_memory
+
+        # create directory for output
+        if not os.path.isdir(out_dir):
+            os.mkdir(out_dir)
 
     def train_dataset(self, dataset_class, **kwargs):
 
@@ -99,3 +110,15 @@ class DataDealer:
         test_dl = self.test_dataloader(test_dataset, device)
 
         return train_dl, val_dl, test_dl
+
+    def save(self, out):
+
+        # generate filename
+        filename = self.run_name + '.' + datetime.now().strftime("%Y%m%d.%H.%M.%S") + '.output.csv'
+        path = os.path.join(self.out_dir, filename)
+
+        # save output
+        df = pd.DataFrame(data=out, index=False)
+        df.to_csv(path)
+
+        logging.info(f'Saved results in:{path}.')

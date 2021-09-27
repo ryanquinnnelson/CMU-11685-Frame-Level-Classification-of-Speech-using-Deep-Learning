@@ -36,7 +36,7 @@ def move_model_to_device(device, model):
     return model
 
 
-def move_data_to_device(device, inputs, model, targets=None):
+def move_data_to_device(device, model, inputs, targets=None):
     """
     Avoids duplication issue with moving to device.
 
