@@ -21,10 +21,11 @@ class DataHandler:
                  val_data_file,
                  val_label_file,
                  test_data_file,
-                 test_label_file=None,
-                 batch_size=16,
-                 num_workers=0,
-                 pin_memory=False):
+                 test_label_file,
+                 batch_size,
+                 num_workers,
+                 pin_memory,
+                 dataset_args_dict):
 
         self.run_name = run_name
         self.data_dir = data_dir
@@ -42,26 +43,27 @@ class DataHandler:
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.pin_memory = pin_memory
+        self.dataset_args_dict = dataset_args_dict
 
-        # create directory for output
-        if not os.path.isdir(out_dir):
-            os.mkdir(out_dir)
+    def setup(self):
+        if not os.path.isdir(self.out_dir):
+            os.mkdir(self.out_dir)
 
-    def train_dataset(self, dataset_class, **kwargs):
+    def train_dataset(self, dataset_class):
 
-        ds = dataset_class(self.train_data_file, self.train_label_file, **kwargs)
+        ds = dataset_class(self.train_data_file, self.train_label_file, **self.dataset_args_dict)
         logging.info(f'Loaded {ds.length} records as training data.')
         return ds
 
-    def val_dataset(self, dataset_class, **kwargs):
+    def val_dataset(self, dataset_class):
 
-        ds = dataset_class(self.val_data_file, self.val_label_file, **kwargs)
+        ds = dataset_class(self.val_data_file, self.val_label_file, **self.dataset_args_dict)
         logging.info(f'Loaded {ds.length} records as validation data.')
         return ds
 
-    def test_dataset(self, dataset_class, **kwargs):
+    def test_dataset(self, dataset_class):
 
-        ds = dataset_class(self.test_data_file, self.test_label_file, **kwargs)
+        ds = dataset_class(self.test_data_file, self.test_label_file, **self.dataset_args_dict)
         logging.info(f'Loaded {ds.length} records as test data.')
         return ds
 
@@ -96,12 +98,12 @@ class DataHandler:
     def test_dataloader(self, dataset, device):
         return self.val_dataloader(dataset, device)  # same configs as validation set
 
-    def load(self, train_dataset_class, val_dataset_class, test_dataset_class, device, **kwargs):
+    def load(self, train_dataset_class, val_dataset_class, test_dataset_class, device):
 
         # Datasets
-        train_dataset = self.train_dataset(train_dataset_class, **kwargs)
-        val_dataset = self.val_dataset(val_dataset_class, **kwargs)
-        test_dataset = self.test_dataset(test_dataset_class, **kwargs)
+        train_dataset = self.train_dataset(train_dataset_class)
+        val_dataset = self.val_dataset(val_dataset_class)
+        test_dataset = self.test_dataset(test_dataset_class)
 
         # DataLoaders
         train_dl = self.train_dataloader(train_dataset, device)

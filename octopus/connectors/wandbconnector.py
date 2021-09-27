@@ -12,17 +12,16 @@ class WandbConnector:
         self.notes = notes
         self.tags = tags
         self.config = config
+        self.wandb_config = None
 
     def setup(self):
         logging.info('Setting up wandb...')
 
         _install()
         _login()
-        wandb_config = _initialize(self.run_name, self.project, self.notes, self.tags, self.config)
+        self.wandb_config = _initialize(self.run_name, self.project, self.notes, self.tags, self.config)
 
         logging.info('wandb is set up.')
-
-        return wandb_config
 
     def watch(self, model):
         import wandb

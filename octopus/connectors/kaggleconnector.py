@@ -12,12 +12,13 @@ import zipfile
 
 class KaggleConnector:
 
-    def __init__(self, kaggle_dir, content_dir, token_file, competition):
+    def __init__(self, kaggle_dir, content_dir, token_file, competition, delete_zipfiles):
         self.kaggle_dir = kaggle_dir
         self.content_dir = content_dir
         self.token_file = token_file
         self.competition = competition
         self.competition_dir = os.path.join(content_dir, 'competition', competition)
+        self.delete_zipfiles = delete_zipfiles
 
     def setup(self):
         logging.info('Setting up kaggle...')
@@ -48,7 +49,7 @@ class KaggleConnector:
         logging.info(stdout.decode("utf-8"))
         logging.info('Competition files downloaded.')
 
-    def unzip(self, delete_zipfiles=True):
+    def unzip(self):
         logging.info('Unzipping competition files...')
         # get filenames
         zipfiles = glob.glob(self.competition_dir + '/*.zip')
@@ -59,15 +60,15 @@ class KaggleConnector:
                 zip_ref.extractall(self.competition_dir)
 
         # clean up original zipfile
-        if delete_zipfiles:
+        if self.delete_zipfiles:
             for f in zipfiles:
                 os.remove(f)
 
         logging.info('Competition files unzipped.')
 
-    def download_and_unzip(self, delete_zipfiles=True):
+    def download_and_unzip(self):
         self.download()
-        self.unzip(delete_zipfiles)
+        self.unzip()
 
 
 def _configure_content_dir(content_dir):

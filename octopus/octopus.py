@@ -1,19 +1,23 @@
 import logging
 import os
+import sys
 import time
 
-
 # local modules
-# import octopus.datahandler
-# import octopus.kaggleconnector as kaggleconnector
-# import octopus.wandbconnector as wandbconnector
-# import octopus.datahandler as datadealer
-# import octopus.devicehandler as devicedealer
-# import octopus.checkpointer as checkpointer
-# import octopus.models as modeler
-# import octopus.components as componentdealer
+import octopus.connectors.kaggleconnector as kc
+import octopus.connectors.wandbconnector as wc
+import octopus.handlers.checkpointhandler as cph
+import octopus.handlers.devicehandler as dh
+import octopus.handlers.datahandler as dah
+import octopus.handlers.modelhandler as mh
+import octopus.handlers.criterionhandler as ch
+import octopus.handlers.optimizerhandler as oh
+import octopus.handlers.schedulerhandler as sh
+
+import customized.datasets as datasets
+
+
 # import octopus.trainer as trainer
-# import customized.datasets as datasets
 
 
 class Octopus:
@@ -21,28 +25,125 @@ class Octopus:
     def __init__(self, config):
         self.config = config
 
-    def setup(self):
-        logging.info('Setting up octopus...')
+        # logging
+        _setup_logging(config['DEFAULT']['debug_file'])
 
-        logging.info('Pipeline is set up.')
+        # kaggle
+        self.kaggleconnector = kc.KaggleConnector(config['kaggle']['kaggle_dir'],
+                                                  config['DEFAULT']['data_dir'],
+                                                  config['kaggle']['token_file'],
+                                                  config['kaggle']['competition'],
+                                                  config['kaggle'].getboolean('delete_zipfiles'))
 
-    def run(self):
-        logging.info('Running octopus...')
+        # wandb
+        self.wandbconnector = wc.WandbConnector(config['wandb']['name'],
+                                                config['wandb']['project'],
+                                                config['wandb']['notes'],
+                                                config['wandb']['tags'],
+                                                dict(config['hyperparameters']))
 
-        logging.info('Pipeline finished running.')
+        # checkpoints
+        self.checkpointhandler = cph.CheckpointHandler(config['checkpoint']['checkpoint_dir'],
+                                                       config['checkpoint']['delete_existing_checkpoints'],
+                                                       config['wandb']['name'])
 
+        # data
+        if config.has_option('data', 'test_label_file'):
+            test_label_file = config['data']['test_label_file']
+        else:
+            test_label_file = None
+        self.datahandler = dah.DataHandler(config['wandb']['name'],
+                                           config['DEFAULT']['data_dir'],
+                                           config['DEFAULT']['output_dir'],
+                                           config['data']['train_data_file'],
+                                           config['data']['train_label_file'],
+                                           config['data']['val_data_file'],
+                                           config['data']['val_label_file'],
+                                           config['data']['test_data_file'],
+                                           test_label_file,
+                                           config['hyperparameters'].getint('batch_size'),
+                                           config['data'].getint('num_workers'),
+                                           config['data'].getboolean('pin_memory'),
+                                           _to_dict(config['data']['dataset_kwargs']))
+
+        # device
+        self.devicehandler = dh.DeviceHandler()
+
+        # model
+        self.modelhandler = mh.ModelHandler(config['model']['model_type'],
+                                            config['data'].getint('input_size'),
+                                            config['data'].getint('output_size'),
+                                            _to_int_list(config['hyperparameters']['hidden_layer_sizes']),
+                                            config['hyperparameters']['activation_func'],
+                                            config['hyperparameters'].getfloat('dropout_rate'),
+                                            config['hyperparameters'].getboolean('batch_norm'))
+
+        # criterion
+        self.criterionhandler = ch.CriterionHandler(config['hyperparameters']['criterion_type'])
+
+        # optimizer
+        self.optimizerhandler = oh.OptimizerHandler(config['hyperparameters']['optimizer_type'],
+                                                    _to_dict(config['hyperparameters']['optimizer_kwargs']), )
+        # scheduler
+        self.schedulerhandler = sh.SchedulerHandler(config['hyperparameters']['scheduler_type'],
+                                                    _to_dict(config['hyperparameters']['scheduler_kwargs']))
+
+    def setup_environment(self):
+        logging.info('Setting up environment...')
+
+        # kaggle
+        self.kaggleconnector.setup()
+        self.kaggleconnector.download_and_unzip()
+
+        # wandb
+        self.wandbconnector.setup()
+
+        # checkpoint directory
+        self.checkpointhandler.setup()
+
+        # output directory
+        self.datahandler.setup()
+
+        logging.info('Environment is set up.')
+
+    def run_pipeline(self):
+        """
+        Note 1:
+        Reason behind moving model to device first:
+        https://stackoverflow.com/questions/66091226/runtimeerror-expected-all-tensors-to-be-on-the-same-device-but-found-at-least
+        """
+        logging.info('Running deep learning pipeline...')
+
+        # model
+        model = self.modelhandler.get_model()
+        self.devicehandler.move_model_to_device(model)  # move model before initializing optimizer - see Note 1
+        self.wandbconnector.watch(model)
+
+        # model components
+        criterion_func = self.criterionhandler.get_criterion()
+        optimizer = self.optimizerhandler.get_optimizer(model)
+        scheduler = self.schedulerhandler.get_scheduler(optimizer)
+
+        # data
+        train_loader, val_loader, test_loader = self.datahandler.load(datasets.TrainValDataset,
+                                                                      datasets.TrainValDataset,
+                                                                      datasets.TestDataset,
+                                                                      self.devicehandler.get_device())
+
+
+
+        logging.info('Deep learning pipeline finished running.')
+
+
+#
+#     wandb.run.summary['best_accuracy'] = val_acc
+#
+#
+# wandb.run.summary['best_epoch'] = epoch
 #
 #     # 1 - setup
-#     _setup_logging(config)
-#     _setup_kaggle(config)
-#     _setup_wandb(config)
-#     _setup_checkpoint_directory(config)
-#     device = devicedealer.set_device()
-#     model = _setup_and_move_model(config, device)
-#     criterion_func, optimizer, scheduler = _setup_training_components(config, model)
-#
-#     # load data
-#     train_loader, val_loader, test_loader = _load_data(config, device)
+
+
 #
 #     # 2 - training
 #     # setup tracking variables and early stopping criteria
@@ -95,134 +196,54 @@ class Octopus:
 #                               config['DEFAULT']['results_dir'])
 #
 #
-# def _to_dict(s):
-#     d = dict()
-#
-#     pairs = s.split(',')
-#     for p in pairs:
-#         key, val = p.strip().split('=')
-#
-#         # try converting the value to a float
-#         try:
-#             val = float(val)
-#         except ValueError:
-#             pass  # leave as string
-#
-#         d[key] = val
-#
-#     return d
-#
-#
-# def _to_int_list(s):
-#     s1 = s.strip().split(',')
-#     l = [int(a) for a in s1]
-#     return l
-#
-#
-# def _setup_logging(config):
-#     debug_file = config['DEFAULT']['debug_file']
-#
-#     # delete any older debug files if they exist
-#     if os.path.isfile(debug_file):
-#         os.remove(debug_file)
-#
-#     # https://youtrack.jetbrains.com/issue/PY-39762
-#     # noinspection PyArgumentList
-#     logging.basicConfig(level=logging.INFO,
-#                         format="%(asctime)s [%(levelname)s] %(message)s",
-#                         handlers=[logging.FileHandler(debug_file), logging.StreamHandler(sys.stdout)]
-#                         )
-#
-#
-# def _setup_kaggle(config):
-#     # kaggle
-#     kaggleconnector.setup(config['kaggle']['kaggle_dir'],
-#                           config['kaggle']['content_dir'],
-#                           config['kaggle']['token_file'])
-#
-#     # competition files
-#     competition_path = kaggleconnector.get_competition_path(config['kaggle']['content_dir'],
-#                                                             config['kaggle']['competition'])
-#     if not os.path.isdir(competition_path):
-#         kaggleconnector.download(config['kaggle']['competition'])
-#         kaggleconnector.unzip(competition_path)
-#
-#
-# def _setup_wandb(config):
-#     # wandb
-#     config = wandbconnector.setup(config['wandb']['name'],
-#                                   config['wandb']['project'],
-#                                   config['wandb']['notes'],
-#                                   config['wandb']['tags'],
-#                                   dict(config['hyperparameters']))
-#
-#     return config
-#
-#
-# def _setup_checkpoint_directory(config):
-#     # setup checkpoint directory
-#     checkpointer.setup_checkpoint_directory(config['checkpoint']['checkpoint_dir'],
-#                                             config['checkpoint']['delete_existing_checkpoints'])
-#
-#
-# def _load_data(config, device):
-#     competition_path = kaggleconnector.get_competition_path(config['kaggle']['content_dir'],
-#                                                             config['kaggle']['competition'])
-#
-#     dataset_dict = _to_dict(config['data']['dataset_kwargs'])
-#     train_loader, val_loader, test_loader = datadealer.load(competition_path,
-#                                                             config['data']['train_data_file'],
-#                                                             config['data']['train_label_file'],
-#                                                             config['data']['val_data_file'],
-#                                                             config['data']['val_label_file'],
-#                                                             config['data']['test_data_file'],
-#                                                             datasets.TrainValDataset,
-#                                                             datasets.TestDataset,
-#                                                             device,
-#                                                             config['hyperparameters'].getint('batch_size'),
-#                                                             config['data'].getint('num_workers'),
-#                                                             config['data'].getboolean('pin_memory'),
-#                                                             **dataset_dict)
-#
-#     return train_loader, val_loader, test_loader
-#
-#
-# def _setup_and_move_model(config, device):
-#     model = modeler.MLP(config['data'].getint('input_size'),
-#                        config['data'].getint('output_size'),
-#                        config['hyperparameters'].getint('num_hidden_layers'),
-#                        _to_int_list(config['hyperparameters']['hidden_layer_sizes']),
-#                        config['hyperparameters']['activation_func'],
-#                        config['hyperparameters'].getfloat('dropout_rate'),
-#                        config['hyperparameters'].getboolean('batch_norm'))
-#
-#     # move model to device before initializing optimizer
-#     # https://stackoverflow.com/questions/66091226/runtimeerror-expected-all-tensors-to-be-on-the-same-device-but-found-at-least
-#     devicedealer.move_model_to_device(device, model)
-#
-#     # watch model
-#     wandbconnector.watch(model)  # log the network weight histograms
-#
-#     return model
-#
-#
-# def _setup_training_components(config, model):
-#     # loss function
-#     criterion = componentdealer.set_criterion(config['hyperparameters']['criterion_type'])
-#
-#     # optimizer
-#     optimizer_dict = _to_dict(config['hyperparameters']['optimizer_kwargs'])
-#     optimizer = componentdealer.set_optimizer(config['hyperparameters']['optimizer_type'],
-#                                          model,
-#                                          **optimizer_dict)
-#
-#     # scheduler
-#     scheduler_dict = _to_dict(config['hyperparameters']['scheduler_kwargs'])
-#     scheduler = componentdealer.set_scheduler(config['hyperparameters']['scheduler_type'],
-#                                          optimizer,
-#                                          **scheduler_dict)
-#
-#     return criterion, optimizer, scheduler
+def _to_dict(s):
+    d = dict()
+
+    pairs = s.split(',')
+    for p in pairs:
+        key, val = p.strip().split('=')
+
+        # try converting the value to a float
+        try:
+            val = float(val)
+        except ValueError:
+            pass  # leave as string
+
+        d[key] = val
+
+    return d
+
+
+def _to_int_list(s):
+    s1 = s.strip().split(',')
+    l = [int(a) for a in s1]
+    return l
+
+
+def _setup_logging(debug_file):
+    # delete any older debug files if they exist
+    if os.path.isfile(debug_file):
+        os.remove(debug_file)
+
+    # write to both debug file and stdout
+    # https://youtrack.jetbrains.com/issue/PY-39762
+    # noinspection PyArgumentList
+    logging.basicConfig(level=logging.INFO,
+                        format="%(asctime)s [%(levelname)s] %(message)s",
+                        handlers=[logging.FileHandler(debug_file), logging.StreamHandler(sys.stdout)]
+                        )
+
+    # # watch model
+    # wandbconnector.watch(model)  # log the network weight histograms
+
+
+def _setup_data(config, device, data_dir):
+    dh =
+
+    dataset_dict =
+
+    return train_loader, val_loader, test_loader
+
 #
 #
 # def _load_checkpoint_if_necessary(model, optimizer, scheduler, config, stats, device):
