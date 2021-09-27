@@ -28,13 +28,11 @@ class TrainingHandler:
                       'val_loss': [],
                       'runtime': []}
 
-    def load_checkpoint_if_necessary(self, devicehandler, checkpointhandler, model, optimizer, scheduler):
-
-        if self.load_from_checkpoint:
-            checkpoint = checkpointhandler.load(self, self.checkpoint_file, devicehandler.get_device(), model,
-                                                optimizer, scheduler)
-            self.stats = checkpoint['stats']
-            self.first_epoch = checkpoint['next_epoch']
+    def load_checkpoint(self, devicehandler, checkpointhandler, model, optimizer, scheduler):
+        checkpoint = checkpointhandler.load(self.checkpoint_file, devicehandler.get_device(), model,
+                                            optimizer, scheduler)
+        self.stats = checkpoint['stats']
+        self.first_epoch = checkpoint['next_epoch']
 
     def train_model(self, train_loader, model, criterion_func, devicehandler, optimizer):
 
@@ -205,6 +203,10 @@ class TrainingHandler:
                             checkpointhandler,
                             schedulerhandler,
                             wandbconnector):
+
+        # load checkpoint if necessary
+        if self.load_from_checkpoint:
+            self.load_checkpoint(devicehandler, checkpointhandler, model, optimizer, scheduler)
 
         # run epochs
         for epoch in range(self.first_epoch, self.num_epochs + 1):

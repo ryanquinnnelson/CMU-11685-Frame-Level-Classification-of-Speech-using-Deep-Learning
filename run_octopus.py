@@ -1,3 +1,7 @@
+"""
+Runs octopus.
+"""
+
 import configparser
 import sys
 

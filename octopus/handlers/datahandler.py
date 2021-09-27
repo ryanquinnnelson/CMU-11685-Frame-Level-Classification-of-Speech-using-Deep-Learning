@@ -98,7 +98,7 @@ class DataHandler:
     def test_dataloader(self, dataset, device):
         return self.val_dataloader(dataset, device)  # same configs as validation set
 
-    def load(self, train_dataset_class, val_dataset_class, test_dataset_class, device):
+    def load(self, train_dataset_class, val_dataset_class, test_dataset_class, devicehandler):
 
         # Datasets
         train_dataset = self.train_dataset(train_dataset_class)
@@ -106,6 +106,7 @@ class DataHandler:
         test_dataset = self.test_dataset(test_dataset_class)
 
         # DataLoaders
+        device = devicehandler.get_device()
         train_dl = self.train_dataloader(train_dataset, device)
         val_dl = self.val_dataloader(val_dataset, device)
         test_dl = self.test_dataloader(test_dataset, device)

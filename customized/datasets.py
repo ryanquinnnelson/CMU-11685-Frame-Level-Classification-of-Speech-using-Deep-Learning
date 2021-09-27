@@ -101,10 +101,7 @@ class TestDataset(Dataset):
         return item.flatten()
 
 
-def convert_to_class_labels(out):
-    #     # retrieve output from device by converting to numpy 2D array
-    #     out = out.cpu().detach().numpy()
-
+def convert_output(out):
     # convert 2D output to 1D a single class label (71 nodes into a single number per output)
     out = np.argmax(out, axis=1)  # column with max value in each row is the index of the predicted label
 
@@ -120,7 +117,7 @@ def calculate_n_hits(out, actual):
     actual = actual.cpu().detach().numpy()
 
     # convert output to class labels
-    pred = convert_to_class_labels(out)
+    pred = convert_output(out)
 
     # compare predictions against actual
     n_hits = np.sum(pred == actual)
