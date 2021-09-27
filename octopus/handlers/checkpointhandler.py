@@ -9,7 +9,7 @@ import shutil
 import torch
 
 
-class Checkpointer:
+class CheckpointHandler:
     def __init__(self, checkpoint_dir, delete_existing_checkpoints, run_name):
         self.checkpoint_dir = checkpoint_dir
         self.delete_existing_checkpoints = delete_existing_checkpoints

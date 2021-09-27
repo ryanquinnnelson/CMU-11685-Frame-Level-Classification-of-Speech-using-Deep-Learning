@@ -1,7 +1,7 @@
 import configparser
 import sys
 
-from pipeline import pipeline
+from octopus import octopus
 
 
 def main():
@@ -10,8 +10,8 @@ def main():
     config = configparser.ConfigParser()
     config.read(config_path)
 
-    # run pipeline
-    pl = pipeline.Pipeline(config)
+    # run octopus
+    pl = octopus.Octopus(config)
     pl.setup()
     pl.run()
 

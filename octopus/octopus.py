@@ -1,41 +1,36 @@
-import configparser
-import sys
 import logging
 import os
 import time
 
+
 # local modules
-# import pipeline.datahandler
-# import pipeline.kaggleconnector as kaggleconnector
-# import pipeline.wandbconnector as wandbconnector
-# import pipeline.datahandler as datadealer
-# import pipeline.devicehandler as devicedealer
-# import pipeline.checkpointer as checkpointer
-# import pipeline.models as modeler
-# import pipeline.components as componentdealer
-# import pipeline.trainer as trainer
+# import octopus.datahandler
+# import octopus.kaggleconnector as kaggleconnector
+# import octopus.wandbconnector as wandbconnector
+# import octopus.datahandler as datadealer
+# import octopus.devicehandler as devicedealer
+# import octopus.checkpointer as checkpointer
+# import octopus.models as modeler
+# import octopus.components as componentdealer
+# import octopus.trainer as trainer
 # import customized.datasets as datasets
 
 
-class Pipeline:
+class Octopus:
 
     def __init__(self, config):
         self.config = config
 
     def setup(self):
-        pass
+        logging.info('Setting up octopus...')
+
+        logging.info('Pipeline is set up.')
 
     def run(self):
-        pass
+        logging.info('Running octopus...')
 
+        logging.info('Pipeline finished running.')
 
-
-#
-# def main():
-#     # parse config file
-#     config_path = sys.argv[1]
-#     config = configparser.ConfigParser()
-#     config.read(config_path)
 #
 #     # 1 - setup
 #     _setup_logging(config)
@@ -95,7 +90,7 @@ class Pipeline:
 #     # 3 - test model
 #     out = trainer.test_model(test_loader, model, device)
 #     predictions = datasets.convert_to_class_labels(out)
-#     pipeline.datahandler.save(predictions,
+#     octopus.datahandler.save(predictions,
 #                               config['wandb']['name'],
 #                               config['DEFAULT']['results_dir'])
 #
@@ -275,8 +270,3 @@ class Pipeline:
 #     # save epoch stats to wandb
 #     wandbconnector.log_stats(epoch_stats)
 #     logging.info(epoch_stats)
-#
-#
-# if __name__ == "__main__":
-#     # execute only if run as a script
-#     main()

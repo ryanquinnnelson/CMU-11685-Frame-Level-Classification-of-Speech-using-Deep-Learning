@@ -3,7 +3,7 @@ import logging
 import torch
 import numpy as np
 
-import pipeline.devicehandler as dh
+import octopus.handlers.devicehandler as dh
 
 
 def train_model(train_loader, model, optimizer, criterion_func, device):

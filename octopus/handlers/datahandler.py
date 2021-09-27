@@ -6,12 +6,11 @@ import os
 import logging
 from datetime import datetime
 
-import numpy as np
 import pandas as pd
 from torch.utils.data import DataLoader
 
 
-class DataDealer:
+class DataHandler:
 
     def __init__(self,
                  run_name,
