@@ -1,3 +1,7 @@
+"""
+Defines all optimization methods Octopus can use.
+"""
+
 import torch.nn as nn
 import torch.optim as optim
 

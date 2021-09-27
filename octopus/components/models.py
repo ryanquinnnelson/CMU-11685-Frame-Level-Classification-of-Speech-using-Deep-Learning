@@ -1,3 +1,7 @@
+"""
+Defines all standard models that Octopus can generate.
+"""
+
 import logging
 from collections import OrderedDict
 

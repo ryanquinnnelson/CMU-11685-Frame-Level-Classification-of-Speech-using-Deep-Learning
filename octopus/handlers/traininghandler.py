@@ -1,3 +1,7 @@
+"""
+All things related to training models.
+"""
+
 import logging
 
 import torch
