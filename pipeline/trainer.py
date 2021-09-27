@@ -5,7 +5,7 @@ import os
 import torch
 import numpy as np
 
-import pipeline.devicedealer as devicedealer
+import pipeline.devicehandler as devicedealer
 
 
 def train_model(train_loader, model, optimizer, criterion_func, device):
@@ -20,7 +20,7 @@ def train_model(train_loader, model, optimizer, criterion_func, device):
         # prep
         optimizer.zero_grad()
         torch.cuda.empty_cache()
-        inputs, targets = devicedealer.move_data_to_device(model, device, inputs, targets)
+        inputs, targets = devicedealer.move_data_to_device(device, inputs, model, targets)
 
         # compute forward pass
         out = model.forward(inputs)
@@ -59,7 +59,7 @@ def evaluate_model(val_loader, model, criterion_func, device, hit_func):
         # process mini-batches
         for (inputs, targets) in val_loader:
             # prep
-            inputs, targets = devicedealer.move_data_to_device(model, device, inputs, targets)
+            inputs, targets = devicedealer.move_data_to_device(device, inputs, model, targets)
 
             # forward pass
             out = model.forward(inputs)
@@ -96,7 +96,7 @@ def test_model(test_loader, model, device):
         # process mini-batches
         for inputs in test_loader:
             # prep
-            inputs, targets = devicedealer.move_data_to_device(model, device, inputs, targets=None)
+            inputs, targets = devicedealer.move_data_to_device(device, inputs, model, targets=None)
 
             # forward pass
             out = model.forward(inputs)

@@ -7,8 +7,8 @@ import time
 # local modules
 import pipeline.kaggleconnector as kaggleconnector
 import pipeline.wandbconnector as wandbconnector
-import pipeline.datadealer as datadealer
-import pipeline.devicedealer as devicedealer
+import pipeline.datahandler as datadealer
+import pipeline.devicehandler as devicedealer
 import pipeline.checkpointer as checkpointer
 import pipeline.modeler as modeler
 import pipeline.componentdealer as componentdealer
@@ -27,7 +27,7 @@ def main():
     _setup_kaggle(config)
     _setup_wandb(config)
     _setup_checkpoint_directory(config)
-    device = devicedealer.setup_device()
+    device = devicedealer.set_device()
     model = _setup_and_move_model(config, device)
     criterion_func, optimizer, scheduler = _setup_training_components(config, model)
 

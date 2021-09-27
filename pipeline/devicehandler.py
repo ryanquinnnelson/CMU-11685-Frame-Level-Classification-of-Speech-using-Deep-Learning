@@ -1,8 +1,13 @@
+"""
+All things device-wise.
+"""
+
 import logging
+
 import torch
 
 
-def setup_device():
+def set_device():
     logging.info('Checking device...')
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -17,6 +22,13 @@ def setup_device():
 
 
 def move_model_to_device(device, model):
+    """
+    Avoids duplication issue with moving to device.
+
+    "Note that calling my_tensor.to(device) returns a new copy of my_tensor on GPU. It does NOT overwrite my_tensor.
+    Therefore, remember to manually overwrite tensors: my_tensor = my_tensor.to(torch.device('cuda'))."
+    https://pytorch.org/tutorials/beginner/saving_loading_models.html#what-is-a-state-dict
+    """
 
     if device.type == 'cuda':
         model = model.to(torch.device('cuda'))
@@ -24,7 +36,7 @@ def move_model_to_device(device, model):
     return model
 
 
-def move_data_to_device(model, device, inputs, targets=None):
+def move_data_to_device(device, inputs, model, targets=None):
     """
     Avoids duplication issue with moving to device.
 
@@ -48,4 +60,3 @@ def move_data_to_device(model, device, inputs, targets=None):
         assert inputs.device == targets.device
 
     return inputs, targets
-
