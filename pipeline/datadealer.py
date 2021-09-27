@@ -1,85 +1,101 @@
+"""
+All things related to data reading and writing.
+"""
+
 import os
 import logging
+
 from torch.utils.data import DataLoader
 
 
-def load_dataset(data_path,
+class DataDealer:
+
+    def __init__(self,
+                 data_dir,
                  train_data_file,
                  train_label_file,
                  val_data_file,
                  val_label_file,
                  test_data_file,
-                 train_val_dataset,
-                 test_dataset,
-                 **kwargs):
-    logging.info('Loading Datasets...')
+                 test_label_file=None,
+                 batch_size=16,
+                 num_workers=0,
+                 pin_memory=False):
 
-    # fully qualified file paths
-    train_data_file = os.path.join(data_path, train_data_file)
-    train_label_file = os.path.join(data_path, train_label_file)
-    val_data_file = os.path.join(data_path, val_data_file)
-    val_label_file = os.path.join(data_path, val_label_file)
-    test_data_file = os.path.join(data_path, test_data_file)
+        self.data_dir = data_dir
+        self.train_data_file = os.path.join(data_dir, train_data_file)
+        self.train_label_file = os.path.join(data_dir, train_label_file)
+        self.val_data_file = os.path.join(data_dir, val_data_file)
+        self.val_label_file = os.path.join(data_dir, val_label_file)
+        self.test_data_file = os.path.join(data_dir, test_data_file)
+        if test_label_file:
+            self.test_label_file = os.path.join(data_dir, test_label_file)
+        else:
+            self.test_label_file = None
 
-    # load Datasets
-    train_data = train_val_dataset(train_data_file, train_label_file, **kwargs)
-    val_data = train_val_dataset(val_data_file, val_label_file, **kwargs)
-    test_data = test_dataset(test_data_file, **kwargs)
+        self.batch_size = batch_size
+        self.num_workers = num_workers
+        self.pin_memory = pin_memory
 
-    logging.info(f'Loaded {train_data.length} records as training data.')
-    logging.info(f'Loaded {val_data.length} records as validation data.')
-    logging.info(f'Loaded {test_data.length} records as test data.')
+    def train_dataset(self, dataset_class, **kwargs):
 
-    logging.info('Datasets loaded.')
-    return train_data, val_data, test_data
+        ds = dataset_class(self.train_data_file, self.train_label_file, **kwargs)
+        logging.info(f'Loaded {ds.length} records as training data.')
+        return ds
 
+    def val_dataset(self, dataset_class, **kwargs):
 
-def load_dataloaders(train_data, val_data, test_data, device, batch_size, num_workers, pin_memory):
-    logging.info('Loading DataLoaders...')
-    # Training DataLoader
-    # set arguments based on GPU or CPU destination
-    if device.type == 'cuda':
-        train_args = dict(shuffle=True,
-                          batch_size=batch_size,
-                          num_workers=num_workers,
-                          pin_memory=pin_memory)
-    else:
-        train_args = dict(shuffle=True,
-                          batch_size=batch_size)
+        ds = dataset_class(self.val_data_file, self.val_label_file, **kwargs)
+        logging.info(f'Loaded {ds.length} records as validation data.')
+        return ds
 
-    train_loader = DataLoader(train_data, **train_args)
+    def test_dataset(self, dataset_class, **kwargs):
 
-    # Validation DataLoader
-    # set arguments based on GPU or CPU destination
-    if device.type == 'cuda':
-        val_args = dict(shuffle=False,
-                        batch_size=batch_size,
-                        num_workers=num_workers,
-                        pin_memory=pin_memory)
-    else:
-        val_args = dict(shuffle=False,
-                        batch_size=batch_size)
+        ds = dataset_class(self.test_data_file, self.test_label_file, **kwargs)
+        logging.info(f'Loaded {ds.length} records as test data.')
+        return ds
 
-    val_loader = DataLoader(val_data, **val_args)
+    def train_dataloader(self, dataset, device):
+        # set arguments based on GPU or CPU destination
+        if device.type == 'cuda':
+            train_args = dict(shuffle=True,
+                              batch_size=self.batch_size,
+                              num_workers=self.num_workers,
+                              pin_memory=self.pin_memory)
+        else:
+            train_args = dict(shuffle=True,
+                              batch_size=self.batch_size)
 
-    # Test DataLoader
-    test_args = val_args  # same as validation dataset
-    test_loader = DataLoader(test_data, **test_args)
+        dl = DataLoader(dataset, **train_args)
+        return dl
 
-    logging.info('DataLoaders loaded.')
-    return train_loader, val_loader, test_loader
+    def val_dataloader(self, dataset, device):
+        # set arguments based on GPU or CPU destination
+        if device.type == 'cuda':
+            val_args = dict(shuffle=False,
+                            batch_size=self.batch_size,
+                            num_workers=self.num_workers,
+                            pin_memory=self.pin_memory)
+        else:
+            val_args = dict(shuffle=False,
+                            batch_size=self.batch_size)
 
+        dl = DataLoader(dataset, **val_args)
+        return dl
 
-def load(data_path, train_data_file, train_label_file, val_data_file, val_label_file, test_data_file, train_val_dataset,
-         test_dataset, device, batch_size, num_workers, pin_memory, **kwargs):
-    # load Datasets
-    train_data, val_data, test_data = load_dataset(data_path, train_data_file, train_label_file, val_data_file,
-                                                   val_label_file,
-                                                   test_data_file, train_val_dataset,
-                                                   test_dataset, **kwargs)
+    def test_dataloader(self, dataset, device):
+        return self.val_dataloader(dataset, device)  # same configs as validation set
 
-    # load DataLoaders
-    train_loader, val_loader, test_loader = load_dataloaders(train_data, val_data, test_data, device, batch_size,
-                                                             num_workers, pin_memory)
+    def load(self, train_dataset_class, val_dataset_class, test_dataset_class, device, **kwargs):
 
-    return train_loader, val_loader, test_loader
+        # Datasets
+        train_dataset = self.train_dataset(train_dataset_class, **kwargs)
+        val_dataset = self.val_dataset(val_dataset_class, **kwargs)
+        test_dataset = self.test_dataset(test_dataset_class, **kwargs)
+
+        # DataLoaders
+        train_dl = self.train_dataloader(train_dataset, device)
+        val_dl = self.val_dataloader(val_dataset, device)
+        test_dl = self.test_dataloader(test_dataset, device)
+
+        return train_dl, val_dl, test_dl
