@@ -1,3 +1,7 @@
+"""
+Performs environment setup for deep learning and runs a deep learning pipeline.
+"""
+
 import logging
 import os
 import sys

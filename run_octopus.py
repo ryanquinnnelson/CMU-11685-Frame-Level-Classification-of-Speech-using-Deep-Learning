@@ -15,9 +15,9 @@ def main():
     config.read(config_path)
 
     # run octopus
-    oc = octopus.Octopus(config)
-    oc.setup_environment()
-    oc.run_pipeline()
+    oct = octopus.Octopus(config)
+    oct.setup_environment()
+    oct.run_pipeline()
 
 
 if __name__ == "__main__":
