@@ -21,8 +21,6 @@ class WandbConnector:
         _login()
         self.wandb_config = _initialize(self.run_name, self.project, self.notes, self.tags, self.config)
 
-        logging.info('wandb connector is set up.')
-
     def watch(self, model):
         import wandb
         wandb.watch(model)  # log the network weight histograms

@@ -37,8 +37,6 @@ class KaggleConnector:
         # configure kaggle to use content directory
         _configure_content_dir(self.content_dir)
 
-        logging.info('kaggle connector setup is complete.')
-
     def download(self):
         if not os.path.isdir(self.competition_dir):
             logging.info(f'Downloading files for kaggle competition:{self.competition}...')
@@ -105,7 +103,7 @@ def _mkdirs(kaggle_dir, content_dir):
 
 
 def _read_kaggle_token(token_file):
-    logging.info(f'Reading kaggle token:{token_file}...')
+    logging.info(f'Reading kaggle token from {token_file}...')
     with open(token_file) as token_source:
         token = json.load(token_source)
         return token

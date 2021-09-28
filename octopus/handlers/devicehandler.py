@@ -21,8 +21,6 @@ class DeviceHandler:
         else:
             logging.info(f'No gpu detected. device is set to {self.device}.')
 
-        logging.info('Device handler setup is complete.')
-
     def get_device(self):
         return self.device
 

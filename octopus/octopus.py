@@ -32,7 +32,7 @@ class Octopus:
 
         # kaggle
         self.kaggleconnector = KaggleConnector(config['kaggle']['kaggle_dir'],
-                                               config['DEFAULT']['data_dir'],
+                                               config['data']['data_dir'],
                                                config['kaggle']['token_file'],
                                                config['kaggle']['competition'],
                                                config['kaggle'].getboolean('delete_zipfiles'))
@@ -41,7 +41,7 @@ class Octopus:
         self.wandbconnector = WandbConnector(config['wandb']['name'],
                                              config['wandb']['project'],
                                              config['wandb']['notes'],
-                                             config['wandb']['tags'],
+                                             _to_string_list(config['wandb']['tags']),
                                              dict(config['hyperparameters']))
 
         # checkpoints
@@ -56,17 +56,17 @@ class Octopus:
             test_label_file = None
         self.datahandler = DataHandler(config['wandb']['name'],
                                        self.kaggleconnector.competition_dir,
-                                       config['DEFAULT']['output_dir'],
+                                       config['data']['output_dir'],
                                        config['data']['train_data_file'],
                                        config['data']['train_label_file'],
                                        config['data']['val_data_file'],
                                        config['data']['val_label_file'],
                                        config['data']['test_data_file'],
                                        test_label_file,
-                                       config['hyperparameters'].getint('batch_size'),
-                                       config['data'].getint('num_workers'),
-                                       config['data'].getboolean('pin_memory'),
-                                       _to_dict(config['data']['dataset_kwargs']))
+                                       config['hyperparameters'].getint('dataloader_batch_size'),
+                                       config['hyperparameters'].getint('dataloader_num_workers'),
+                                       config['hyperparameters'].getboolean('dataloader_pin_memory'),
+                                       _to_dict(config['hyperparameters']['dataset_kwargs']))
 
         # device
         self.devicehandler = DeviceHandler()
@@ -106,11 +106,11 @@ class Octopus:
     def setup_environment(self):
         logging.info('octopus is setting up the environment...')
 
-        # kaggle
-        self.kaggleconnector.setup()
-
         # wandb
         self.wandbconnector.setup()
+
+        # kaggle
+        self.kaggleconnector.setup()
 
         # checkpoint directory
         self.checkpointhandler.setup()
@@ -184,6 +184,10 @@ def _to_dict(s):
 
 def _to_int_list(s):
     return [int(a) for a in s.strip().split(',')]
+
+
+def _to_string_list(s):
+    return s.strip().split(',')
 
 
 def _setup_logging(debug_file):

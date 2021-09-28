@@ -24,7 +24,7 @@ class CheckpointHandler:
             utilities.delete_directory(self.checkpoint_dir)
 
         utilities.create_directory(self.checkpoint_dir)
-        logging.info('Checkpoint handler setup is complete.')
+
 
     def save(self, model, optimizer, scheduler, next_epoch, stats):
         # build filename
