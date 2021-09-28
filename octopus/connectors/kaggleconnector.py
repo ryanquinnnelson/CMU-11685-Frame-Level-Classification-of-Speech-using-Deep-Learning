@@ -49,26 +49,21 @@ class KaggleConnector:
             logging.info('Competition files are already downloaded.')
 
     def unzip(self):
-        if not os.path.isdir(self.competition_dir):
-            logging.info('Unzipping competition files...')
-            # get filenames
-            zipfiles = glob.glob(self.competition_dir + '/*.zip')
 
-            # verify files exist
-            if len(zipfiles) == 0:
-                raise ValueError("No files were found.")
+        logging.info('Unzipping competition files...')
+        # get filenames
+        zipfiles = glob.glob(self.competition_dir + '/*.zip')
 
-            # unzip each file
+        # unzip each file
+        for f in zipfiles:
+            with zipfile.ZipFile(f, 'r') as zip_ref:
+                zip_ref.extractall(self.competition_dir)
+
+        # clean up original zipfile
+        if self.delete_zipfiles:
             for f in zipfiles:
-                with zipfile.ZipFile(f, 'r') as zip_ref:
-                    zip_ref.extractall(self.competition_dir)
+                os.remove(f)
 
-            # clean up original zipfile
-            if self.delete_zipfiles:
-                for f in zipfiles:
-                    os.remove(f)
-        else:
-            logging.info('Competition files are already unzipped.')
 
     def download_and_unzip(self):
         self.download()
