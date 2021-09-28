@@ -6,6 +6,9 @@ import logging
 import os
 import sys
 
+# execute before loading torch
+os.environ['CUDA_LAUNCH_BLOCKING'] = "1"   # better error tracking from gpu
+
 # local modules
 from octopus.connectors.kaggleconnector import KaggleConnector
 from octopus.connectors.wandbconnector import WandbConnector
@@ -24,7 +27,7 @@ class Octopus:
 
     def __init__(self, config):
         # logging
-        _setup_logging(config['DEFAULT']['debug_file'])
+        _setup_logging(config['debug']['debug_file'])
         logging.info('Initializing octopus...')
 
         # save configuration
