@@ -47,7 +47,8 @@ class Octopus:
         # checkpoints
         self.checkpointhandler = CheckpointHandler(config['checkpoint']['checkpoint_dir'],
                                                    config['checkpoint']['delete_existing_checkpoints'],
-                                                   config['wandb']['name'])
+                                                   config['wandb']['name'],
+                                                   config['checkpoint'].getboolean('load_from_checkpoint'))
 
         # data
         if config.has_option('data', 'test_label_file'):

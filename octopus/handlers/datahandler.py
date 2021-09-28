@@ -128,7 +128,7 @@ class DataHandler:
         filename = f'{self.run_name}.epoch{epoch}.{datetime.now().strftime("%Y%m%d.%H.%M.%S")}.output.csv'
         path = os.path.join(self.output_dir, filename)
 
-        logging.info(f'Saving output to {path}...')
+        logging.info(f'Saving test output to {path}...')
 
         # save output
         df = pd.DataFrame(data=out)

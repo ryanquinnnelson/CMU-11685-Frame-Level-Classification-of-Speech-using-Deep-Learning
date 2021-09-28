@@ -11,10 +11,16 @@ from octopus.utilities import utilities
 
 
 class CheckpointHandler:
-    def __init__(self, checkpoint_dir, delete_existing_checkpoints, run_name):
+    def __init__(self, checkpoint_dir, delete_existing_checkpoints, run_name, load_from_checkpoint):
         self.checkpoint_dir = checkpoint_dir
         self.delete_existing_checkpoints = delete_existing_checkpoints
         self.run_name = run_name
+        self.load_from_checkpoint = load_from_checkpoint
+
+        if self.load_from_checkpoint:
+            logging.info('Overriding delete_existing_checkpoints value. ' +
+                         'Existing checkpoints will not be deleted because checkpoint is being loaded for this run.')
+            self.delete_existing_checkpoints = False
 
     def setup(self):
         logging.info('Setting up checkpoint handler...')
@@ -24,7 +30,6 @@ class CheckpointHandler:
             utilities.delete_directory(self.checkpoint_dir)
 
         utilities.create_directory(self.checkpoint_dir)
-
 
     def save(self, model, optimizer, scheduler, next_epoch, stats):
         # build filename
