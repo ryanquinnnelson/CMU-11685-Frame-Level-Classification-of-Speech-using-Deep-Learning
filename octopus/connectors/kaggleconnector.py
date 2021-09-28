@@ -21,7 +21,7 @@ class KaggleConnector:
         self.delete_zipfiles = delete_zipfiles
 
     def setup(self):
-        logging.info('Setting up kaggle...')
+        logging.info('Setting up kaggle connector...')
 
         # download and install library
         _install()
@@ -37,17 +37,16 @@ class KaggleConnector:
         # configure kaggle to use content directory
         _configure_content_dir(self.content_dir)
 
-        logging.info('kaggle is set up.')
+        logging.info('kaggle connector setup is complete.')
 
     def download(self):
         if not os.path.isdir(self.competition_dir):
-            logging.info(f'Downloading kaggle competition:{self.competition}...')
+            logging.info(f'Downloading files for kaggle competition:{self.competition}...')
             process = subprocess.Popen(['kaggle', 'competitions', 'download', '-c', self.competition],
                                        stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE)
             stdout, stderr = process.communicate()
             logging.info(stdout.decode("utf-8"))
-            logging.info('Competition files downloaded.')
         else:
             logging.info('Competition files are already downloaded.')
 
@@ -70,8 +69,6 @@ class KaggleConnector:
             if self.delete_zipfiles:
                 for f in zipfiles:
                     os.remove(f)
-
-            logging.info('Competition files unzipped.')
         else:
             logging.info('Competition files are already unzipped.')
 
@@ -81,6 +78,7 @@ class KaggleConnector:
 
 
 def _configure_content_dir(content_dir):
+    logging.info('Configuring content directory for kaggle...')
     process = subprocess.Popen(['kaggle', 'config', 'set', '-n', 'path', '-v', content_dir],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
@@ -89,22 +87,32 @@ def _configure_content_dir(content_dir):
 
 
 def _mkdirs(kaggle_dir, content_dir):
+    logging.info('Setting up kaggle directories...')
+
     # kaggle directory
     if not os.path.isdir(kaggle_dir):
+        logging.info(f'Making kaggle directory:{kaggle_dir}...')
         os.mkdir(kaggle_dir)
+    else:
+        logging.info(f'kaggle directory already exists:{kaggle_dir}.')
 
     # kaggle content directory
     if not os.path.isdir(content_dir):
+        logging.info(f'Making kaggle content directory:{content_dir}...')
         os.mkdir(content_dir)
+    else:
+        logging.info(f'kaggle content directory already exists:{content_dir}.')
 
 
 def _read_kaggle_token(token_file):
+    logging.info(f'Reading kaggle token:{token_file}...')
     with open(token_file) as token_source:
         token = json.load(token_source)
         return token
 
 
 def _write_kaggle_token(token, kaggle_dir):
+    logging.info(f'Writing kaggle token to {kaggle_dir}...')
     token_dest = os.path.join(kaggle_dir, 'kaggle.json')
     with open(token_dest, 'w') as file:
         json.dump(token, file)
@@ -113,6 +121,7 @@ def _write_kaggle_token(token, kaggle_dir):
 
 
 def _secure_kaggle_token(token_dest):
+    logging.info('Securing kaggle token...')
     process = subprocess.Popen(['chmod', '600', token_dest],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
@@ -127,4 +136,3 @@ def _install():
                                stderr=subprocess.PIPE)
     stdout, stderr = process.communicate()
     logging.info(stdout.decode("utf-8"))
-    logging.info('kaggle installed.')

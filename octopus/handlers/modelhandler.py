@@ -33,6 +33,5 @@ class ModelHandler:
                         self.activation_func,
                         self.dropout_rate,
                         self.batch_norm)
-        logging.info('Model initialized.')
-        logging.info(f'\n{model}')
+        logging.info('Model initialized:\n{model}')
         return model

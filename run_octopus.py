@@ -5,7 +5,7 @@ Runs octopus.
 import configparser
 import sys
 
-from octopus import octopus
+from octopus.octopus import Octopus
 
 
 def main():
@@ -15,11 +15,11 @@ def main():
     config.read(config_path)
 
     # run octopus
-    oct = octopus.Octopus(config)
-    oct.setup_environment()
-    oct.download_data()
-    oct.run_pipeline()
-
+    octopus = Octopus(config)
+    octopus.setup_environment()
+    octopus.download_data()
+    octopus.run_pipeline()
+    octopus.cleanup()
 
 if __name__ == "__main__":
     # execute only if run as a script

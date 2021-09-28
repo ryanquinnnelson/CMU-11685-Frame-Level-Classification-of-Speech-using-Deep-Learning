@@ -15,17 +15,17 @@ class WandbConnector:
         self.wandb_config = None
 
     def setup(self):
-        logging.info('Setting up wandb...')
+        logging.info('Setting up wandb connector...')
 
         _install()
         _login()
         self.wandb_config = _initialize(self.run_name, self.project, self.notes, self.tags, self.config)
 
-        logging.info('wandb is set up.')
+        logging.info('wandb connector is set up.')
 
     def watch(self, model):
         import wandb
-        wandb.watch(model) # log the network weight histograms
+        wandb.watch(model)  # log the network weight histograms
 
     def log_stats(self, stats_dict):
         import wandb
@@ -46,7 +46,6 @@ def _install():
                                stderr=subprocess.PIPE)
     stdout, stderr = process.communicate()
     logging.info(stdout.decode("utf-8"))
-    logging.info('wandb is installed.')
 
 
 def _login():
@@ -54,7 +53,6 @@ def _login():
 
     import wandb
     wandb.login()
-    logging.info('Logged into wandb.')
 
 
 def _initialize(name, project, notes, tags, config):
@@ -66,7 +64,5 @@ def _initialize(name, project, notes, tags, config):
                notes=notes,
                tags=tags,
                config=config)
-
-    logging.info('wandb is initialized.')
 
     return wandb.config

@@ -4,9 +4,10 @@ All things related to model checkpoints.
 
 import os
 import logging
-import shutil
 
 import torch
+
+from octopus.utilities import utilities
 
 
 class CheckpointHandler:
@@ -16,15 +17,19 @@ class CheckpointHandler:
         self.run_name = run_name
 
     def setup(self):
-        logging.info('Setting up checkpoint directory...')
-        if self.delete_existing_checkpoints:
-            _delete_directory(self.checkpoint_dir)
+        logging.info('Setting up checkpoint handler...')
 
-        _create_directory(self.checkpoint_dir)
-        logging.info('Checkpoint directory is set up.')
+        logging.info('Preparing checkpoint directory...')
+        if self.delete_existing_checkpoints:
+            utilities.delete_directory(self.checkpoint_dir)
+
+        utilities.create_directory(self.checkpoint_dir)
+        logging.info('Checkpoint handler setup is complete.')
 
     def save(self, model, optimizer, scheduler, next_epoch, stats):
-        logging.info('Saving checkpoint...')
+        # build filename
+        filename = os.path.join(self.checkpoint_dir, f'{self.run_name}.checkpoint.{next_epoch - 1}.pt')
+        logging.info(f'Saving checkpoint to {filename}...')
 
         # build state dictionary
         checkpoint = {
@@ -35,10 +40,7 @@ class CheckpointHandler:
             'stats': stats
         }
 
-        # save file
-        filename = os.path.join(self.checkpoint_dir, f'{self.run_name}.checkpoint.{next_epoch - 1}.pt')
         torch.save(checkpoint, filename)
-        logging.info(f'Saved checkpoint to {filename}.')
 
     def load(self, filename, device, model, optimizer, scheduler):
         logging.info(f'Loading checkpoint from {filename}...')
@@ -49,20 +51,4 @@ class CheckpointHandler:
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
 
-        logging.info('Checkpoint loaded.')
-
         return checkpoint
-
-
-def _create_directory(path):
-    if os.path.isdir(path):
-        logging.info(f'Directory already exists:{path}.')
-    else:
-        os.mkdir(path)
-        logging.info(f'Created directory:{path}.')
-
-
-def _delete_directory(path):
-    if os.path.isdir(path):
-        shutil.rmtree(path)
-        logging.info(f'Deleted directory:{path}.')

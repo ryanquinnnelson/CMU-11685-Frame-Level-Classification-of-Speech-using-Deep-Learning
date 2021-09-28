@@ -12,13 +12,16 @@ class DeviceHandler:
         self.device = None
 
     def setup(self):
+        logging.info('Setting up device handler...')
         logging.info('Checking device...')
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         if self.device.type == 'cuda':
-            logging.info(f'device is {self.device}.')
+            logging.info(f'Gpu detected. device is set to {self.device}.')
         else:
-            logging.info(f'device is {self.device}.')
+            logging.info(f'No gpu detected. device is set to {self.device}.')
+
+        logging.info('Device handler setup is complete.')
 
     def get_device(self):
         return self.device

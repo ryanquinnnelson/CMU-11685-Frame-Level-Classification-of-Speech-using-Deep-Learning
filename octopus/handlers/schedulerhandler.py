@@ -40,7 +40,7 @@ class SchedulerHandler:
         elif self.scheduler_type == 'ReduceLROnPlateau':
             scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, **self.scheduler_kwargs)
 
-        logging.info(f'Scheduler initialized.\n{scheduler.__str__()}')
+        logging.info(f'Scheduler initialized.\n{type(scheduler)}')
         return scheduler
 
     def update_scheduler(self, scheduler, plateau_metric):

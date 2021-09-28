@@ -9,6 +9,8 @@ from datetime import datetime
 import pandas as pd
 from torch.utils.data import DataLoader
 
+from octopus.utilities import utilities
+
 
 class DataHandler:
 
@@ -49,9 +51,10 @@ class DataHandler:
         self.dataset_kwargs = dataset_kwargs
 
     def setup(self):
-        logging.info('Setting up output directory...')
-        _create_directory(self.output_dir)
-        logging.info('Output directory is set up.')
+        logging.info('Setting up data handler...')
+
+        logging.info('Preparing output directory...')
+        utilities.create_directory(self.output_dir)
 
     def train_dataset(self, dataset_class):
 
@@ -104,6 +107,8 @@ class DataHandler:
 
     def load(self, train_dataset_class, val_dataset_class, test_dataset_class, devicehandler):
 
+        logging.info('Loading data...')
+
         # Datasets
         train_dataset = self.train_dataset(train_dataset_class)
         val_dataset = self.val_dataset(val_dataset_class)
@@ -117,22 +122,14 @@ class DataHandler:
 
         return train_dl, val_dl, test_dl
 
-    def save(self, out):
+    def save(self, out, epoch):
 
         # generate filename
-        filename = self.run_name + '.' + datetime.now().strftime("%Y%m%d.%H.%M.%S") + '.output.csv'
+        filename = f'{self.run_name}.epoch{epoch}.{datetime.now().strftime("%Y%m%d.%H.%M.%S")}.output.csv'
         path = os.path.join(self.output_dir, filename)
 
+        logging.info(f'Saving output to {path}...')
+
         # save output
-        df = pd.DataFrame(data=out, index=False)
-        df.to_csv(path)
-
-        logging.info(f'Saved output in:{path}.')
-
-
-def _create_directory(path):
-    if os.path.isdir(path):
-        logging.info(f'Directory already exists:{path}.')
-    else:
-        os.mkdir(path)
-        logging.info(f'Created directory:{path}.')
+        df = pd.DataFrame(data=out)
+        df.to_csv(path, header=False)

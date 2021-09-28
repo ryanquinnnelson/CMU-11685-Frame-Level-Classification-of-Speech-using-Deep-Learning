@@ -11,8 +11,8 @@ import numpy as np
 import octopus.handlers.devicehandler as dh
 
 
-def train_model(train_loader, model, criterion_func, devicehandler, optimizer):
-    logging.info('Training model...')
+def train_model(epoch, num_epochs, train_loader, model, criterion_func, devicehandler, optimizer):
+    logging.info(f'Running epoch {epoch}/{num_epochs} of training...')
     train_loss = 0
 
     # Set model in 'Training mode'
@@ -45,12 +45,11 @@ def train_model(train_loader, model, criterion_func, devicehandler, optimizer):
     # calculate average loss across all mini-batches
     train_loss /= len(train_loader)
 
-    logging.info('Training iteration is finished.')
     return train_loss
 
 
-def evaluate_model(val_loader, model, loss_func, devicehandler, acc_func):
-    logging.info('Evaluating model...')
+def evaluate_model(epoch, num_epochs, val_loader, model, loss_func, devicehandler, acc_func):
+    logging.info(f'Running epoch {epoch}/{num_epochs} of evaluation...')
     val_loss = 0
     hits = 0
 
@@ -83,12 +82,11 @@ def evaluate_model(val_loader, model, loss_func, devicehandler, acc_func):
         val_loss /= len(val_loader)  # average per mini-batch
         val_acc = hits / len(val_loader.dataset)  # global accuracy
 
-        logging.info('Evaluation iteration is finished.')
         return val_loss, val_acc
 
 
-def test_model(test_loader, model, devicehandler):
-    logging.info('Testing model...')
+def test_model(epoch, num_epochs, test_loader, model, devicehandler):
+    logging.info(f'Running epoch {epoch}/{num_epochs} of testing...')
     output = []
 
     with torch.no_grad():  # deactivate autograd engine to improve efficiency
@@ -118,7 +116,6 @@ def test_model(test_loader, model, devicehandler):
             out = out.cpu().detach().numpy()  # extract from gpu
             output.append(out)
 
-    logging.info('Testing is finished.')
     return np.concatenate(output, axis=0)
 
 
@@ -137,7 +134,7 @@ class TrainingHandler:
                       'val_acc': [],
                       'val_loss': [],
                       'runtime': [],
-                      'epoch:': []}
+                      'epoch': []}
 
     def load_checkpoint(self, devicehandler, checkpointhandler, model, optimizer, scheduler):
         device = devicehandler.get_device()
@@ -175,7 +172,7 @@ class TrainingHandler:
                        'val_acc': self.stats['val_acc'][-1],
                        'runtime': self.stats['runtime'][-1]}
         wandbconnector.log_stats(epoch_stats)
-        logging.info(epoch_stats)
+        logging.info(f'stats:{epoch_stats}')
 
     def collect_stats(self, epoch, train_loss, val_loss, val_acc, start, end):
 
@@ -207,15 +204,15 @@ class TrainingHandler:
             start = time.time()
 
             # train
-            train_loss = train_model(train_loader, model, loss_func, devicehandler, optimizer)
+            train_loss = train_model(epoch, self.num_epochs, train_loader, model, loss_func, devicehandler, optimizer)
 
             # validate
-            val_loss, val_acc = evaluate_model(val_loader, model, loss_func, devicehandler, acc_func)
+            val_loss, val_acc = evaluate_model(epoch, self.num_epochs, val_loader, model, loss_func, devicehandler, acc_func)
 
             # test
-            out = test_model(test_loader, model, devicehandler)
+            out = test_model(epoch, self.num_epochs, test_loader, model, devicehandler)
             out = conversion_func(out)
-            datahandler.save(out)
+            datahandler.save(out, epoch)
 
             # stats
             end = time.time()
@@ -225,7 +222,7 @@ class TrainingHandler:
             # scheduler
             schedulerhandler.update_scheduler(scheduler, val_acc)
 
-            # save model in case of issues
+            # save model checkpoint
             checkpointhandler.save(model, optimizer, scheduler, epoch + 1, self.stats)
 
             # check if early stopping criteria is met

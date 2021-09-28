@@ -95,11 +95,13 @@ class Octopus:
             checkpoint_file = config['checkpoint']['checkpoint_file']
         else:
             checkpoint_file = None
+        first_epoch = 1
         self.traininghandler = TrainingHandler(config['checkpoint'].getboolean('load_from_checkpoint'),
+                                               first_epoch,
                                                config['hyperparameters'].getint('num_epochs'),
                                                checkpoint_file)
 
-        logging.info('octopus initialized.')
+        logging.info('octopus initialization is complete.')
 
     def setup_environment(self):
         logging.info('octopus is setting up the environment...')
@@ -116,12 +118,15 @@ class Octopus:
         # output directory
         self.datahandler.setup()
 
-        logging.info('Environment setup complete.')
+        # device
+        self.devicehandler.setup()
+
+        logging.info('octopus has finished setting up the environment.')
 
     def download_data(self):
         logging.info('octopus is downloading data...')
         self.kaggleconnector.download_and_unzip()
-        logging.info('Data download complete.')
+        logging.info('octopus has finished downloading data.')
 
     def run_pipeline(self):
         """
@@ -129,10 +134,7 @@ class Octopus:
         Reason behind moving model to device first:
         https://stackoverflow.com/questions/66091226/runtimeerror-expected-all-tensors-to-be-on-the-same-device-but-found-at-least
         """
-        logging.info('octopus is running the deep learning pipeline...')
-
-        # device
-        self.devicehandler.setup()
+        logging.info('octopus is running the pipeline...')
 
         # initialize model
         model = self.modelhandler.get_model()
@@ -149,14 +151,17 @@ class Octopus:
                                                                       datasets.TrainValDataset, datasets.TestDataset,
                                                                       self.devicehandler)
 
-        # # train and test model
-        # self.traininghandler.run_training_epochs(train_loader, val_loader, test_loader, model, optimizer, scheduler,
-        #                                          loss_func,
-        #                                          datasets.acc_func, datasets.convert_output, self.datahandler,
-        #                                          self.devicehandler, self.checkpointhandler,
-        #                                          self.schedulerhandler, self.wandbconnector)
+        # train and test model
+        self.traininghandler.run_training_epochs(train_loader, val_loader, test_loader, model, optimizer, scheduler,
+                                                 loss_func,
+                                                 datasets.acc_func, datasets.convert_output, self.datahandler,
+                                                 self.devicehandler, self.checkpointhandler,
+                                                 self.schedulerhandler, self.wandbconnector)
 
-        logging.info('Pipeline run is complete.')
+        logging.info('octopus has finished running the pipeline.')
+
+    def cleanup(self):
+        logging.info('octopus shutdown complete.')
 
 
 def _to_dict(s):
