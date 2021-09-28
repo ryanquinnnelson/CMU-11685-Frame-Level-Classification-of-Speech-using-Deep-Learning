@@ -77,33 +77,47 @@ class DataHandler:
     def train_dataloader(self, dataset, device):
         # set arguments based on GPU or CPU destination
         if device.type == 'cuda':
-            train_args = dict(shuffle=True,
-                              batch_size=self.batch_size,
-                              num_workers=self.num_workers,
-                              pin_memory=self.pin_memory)
+            dl_args = dict(shuffle=True,
+                           batch_size=self.batch_size,
+                           num_workers=self.num_workers,
+                           pin_memory=self.pin_memory)
         else:
-            train_args = dict(shuffle=True,
-                              batch_size=self.batch_size)
+            dl_args = dict(shuffle=True,
+                           batch_size=self.batch_size)
 
-        dl = DataLoader(dataset, **train_args)
+        logging.info(f'DataLoader settings for training dataset:\n{dl_args}')
+        dl = DataLoader(dataset, **dl_args)
         return dl
 
     def val_dataloader(self, dataset, device):
         # set arguments based on GPU or CPU destination
         if device.type == 'cuda':
-            val_args = dict(shuffle=False,
-                            batch_size=self.batch_size,
-                            num_workers=self.num_workers,
-                            pin_memory=self.pin_memory)
+            dl_args = dict(shuffle=False,
+                           batch_size=self.batch_size,
+                           num_workers=self.num_workers,
+                           pin_memory=self.pin_memory)
         else:
-            val_args = dict(shuffle=False,
-                            batch_size=self.batch_size)
+            dl_args = dict(shuffle=False,
+                           batch_size=self.batch_size)
 
-        dl = DataLoader(dataset, **val_args)
+        logging.info(f'DataLoader settings for validation dataset:\n{dl_args}')
+        dl = DataLoader(dataset, **dl_args)
         return dl
 
     def test_dataloader(self, dataset, device):
-        return self.val_dataloader(dataset, device)  # same configs as validation set
+        # set arguments based on GPU or CPU destination
+        if device.type == 'cuda':
+            dl_args = dict(shuffle=False,
+                           batch_size=self.batch_size,
+                           num_workers=self.num_workers,
+                           pin_memory=self.pin_memory)
+        else:
+            dl_args = dict(shuffle=False,
+                           batch_size=self.batch_size)
+
+        logging.info(f'DataLoader settings for test dataset:\n{dl_args}')
+        dl = DataLoader(dataset, **dl_args)
+        return dl
 
     def load(self, train_dataset_class, val_dataset_class, test_dataset_class, devicehandler):
 
