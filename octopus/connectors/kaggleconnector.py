@@ -17,7 +17,7 @@ class KaggleConnector:
         self.content_dir = content_dir
         self.token_file = token_file
         self.competition = competition
-        self.competition_dir = os.path.join(content_dir, 'competition', competition)
+        self.competition_dir = os.path.join(content_dir, 'competitions', competition)
         self.delete_zipfiles = delete_zipfiles
 
     def setup(self):
@@ -40,31 +40,40 @@ class KaggleConnector:
         logging.info('kaggle is set up.')
 
     def download(self):
-
-        logging.info(f'Downloading kaggle competition:{self.competition}...')
-        process = subprocess.Popen(['kaggle', 'competitions', 'download', '-c', self.competition],
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
-        logging.info(stdout.decode("utf-8"))
-        logging.info('Competition files downloaded.')
+        if not os.path.isdir(self.competition_dir):
+            logging.info(f'Downloading kaggle competition:{self.competition}...')
+            process = subprocess.Popen(['kaggle', 'competitions', 'download', '-c', self.competition],
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            logging.info(stdout.decode("utf-8"))
+            logging.info('Competition files downloaded.')
+        else:
+            logging.info('Competition files are already downloaded.')
 
     def unzip(self):
-        logging.info('Unzipping competition files...')
-        # get filenames
-        zipfiles = glob.glob(self.competition_dir + '/*.zip')
+        if not os.path.isdir(self.competition_dir):
+            logging.info('Unzipping competition files...')
+            # get filenames
+            zipfiles = glob.glob(self.competition_dir + '/*.zip')
 
-        # unzip each file
-        for f in zipfiles:
-            with zipfile.ZipFile(f, 'r') as zip_ref:
-                zip_ref.extractall(self.competition_dir)
+            # verify files exist
+            if len(zipfiles) == 0:
+                raise ValueError("No files were found.")
 
-        # clean up original zipfile
-        if self.delete_zipfiles:
+            # unzip each file
             for f in zipfiles:
-                os.remove(f)
+                with zipfile.ZipFile(f, 'r') as zip_ref:
+                    zip_ref.extractall(self.competition_dir)
 
-        logging.info('Competition files unzipped.')
+            # clean up original zipfile
+            if self.delete_zipfiles:
+                for f in zipfiles:
+                    os.remove(f)
+
+            logging.info('Competition files unzipped.')
+        else:
+            logging.info('Competition files are already unzipped.')
 
     def download_and_unzip(self):
         self.download()

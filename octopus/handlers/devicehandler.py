@@ -9,6 +9,9 @@ import torch
 
 class DeviceHandler:
     def __init__(self):
+        self.device = None
+
+    def setup(self):
         logging.info('Checking device...')
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

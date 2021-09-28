@@ -25,6 +25,7 @@ class Octopus:
     def __init__(self, config):
         # logging
         _setup_logging(config['DEFAULT']['debug_file'])
+        logging.info('Running octopus...')
 
         # save configuration
         self.config = config
@@ -103,7 +104,6 @@ class Octopus:
 
         # kaggle
         self.kaggleconnector.setup()
-        self.kaggleconnector.download_and_unzip()
 
         # wandb
         self.wandbconnector.setup()
@@ -116,6 +116,11 @@ class Octopus:
 
         logging.info('Environment is set up.')
 
+    def download_data(self):
+        logging.info('Downloading data...')
+        self.kaggleconnector.download_and_unzip()
+        logging.info('Data is downloaded.')
+
     def run_pipeline(self):
         """
         Note 1:
@@ -123,6 +128,9 @@ class Octopus:
         https://stackoverflow.com/questions/66091226/runtimeerror-expected-all-tensors-to-be-on-the-same-device-but-found-at-least
         """
         logging.info('Running deep learning pipeline...')
+
+        # device
+        self.devicehandler.setup()
 
         # initialize model
         model = self.modelhandler.get_model()
