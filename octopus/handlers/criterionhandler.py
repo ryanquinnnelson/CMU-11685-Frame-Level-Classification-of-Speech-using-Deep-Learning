@@ -1,6 +1,7 @@
 """
 All things related to criterion.
 """
+import logging
 
 import torch.nn as nn
 
@@ -15,4 +16,5 @@ class CriterionHandler:
         if self.criterion_type == 'CrossEntropyLoss':
             criterion = nn.CrossEntropyLoss()
 
+        logging.info(f'Criterion is set:{criterion}.')
         return criterion

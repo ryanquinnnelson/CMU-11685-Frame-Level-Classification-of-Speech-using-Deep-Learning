@@ -25,7 +25,7 @@ class Octopus:
     def __init__(self, config):
         # logging
         _setup_logging(config['DEFAULT']['debug_file'])
-        logging.info('Running octopus...')
+        logging.info('Initializing octopus...')
 
         # save configuration
         self.config = config
@@ -55,7 +55,7 @@ class Octopus:
         else:
             test_label_file = None
         self.datahandler = DataHandler(config['wandb']['name'],
-                                       config['DEFAULT']['data_dir'],
+                                       self.kaggleconnector.competition_dir,
                                        config['DEFAULT']['output_dir'],
                                        config['data']['train_data_file'],
                                        config['data']['train_label_file'],
@@ -99,8 +99,10 @@ class Octopus:
                                                config['hyperparameters'].getint('num_epochs'),
                                                checkpoint_file)
 
+        logging.info('octopus initialized.')
+
     def setup_environment(self):
-        logging.info('Setting up environment...')
+        logging.info('octopus is setting up the environment...')
 
         # kaggle
         self.kaggleconnector.setup()
@@ -114,12 +116,12 @@ class Octopus:
         # output directory
         self.datahandler.setup()
 
-        logging.info('Environment is set up.')
+        logging.info('Environment setup complete.')
 
     def download_data(self):
-        logging.info('Downloading data...')
+        logging.info('octopus is downloading data...')
         self.kaggleconnector.download_and_unzip()
-        logging.info('Data is downloaded.')
+        logging.info('Data download complete.')
 
     def run_pipeline(self):
         """
@@ -127,7 +129,7 @@ class Octopus:
         Reason behind moving model to device first:
         https://stackoverflow.com/questions/66091226/runtimeerror-expected-all-tensors-to-be-on-the-same-device-but-found-at-least
         """
-        logging.info('Running deep learning pipeline...')
+        logging.info('octopus is running the deep learning pipeline...')
 
         # device
         self.devicehandler.setup()
@@ -147,14 +149,14 @@ class Octopus:
                                                                       datasets.TrainValDataset, datasets.TestDataset,
                                                                       self.devicehandler)
 
-        # train and test model
-        self.traininghandler.run_training_epochs(train_loader, val_loader, test_loader, model, optimizer, scheduler,
-                                                 loss_func,
-                                                 datasets.acc_func, datasets.convert_output, self.datahandler,
-                                                 self.devicehandler, self.checkpointhandler,
-                                                 self.schedulerhandler, self.wandbconnector)
+        # # train and test model
+        # self.traininghandler.run_training_epochs(train_loader, val_loader, test_loader, model, optimizer, scheduler,
+        #                                          loss_func,
+        #                                          datasets.acc_func, datasets.convert_output, self.datahandler,
+        #                                          self.devicehandler, self.checkpointhandler,
+        #                                          self.schedulerhandler, self.wandbconnector)
 
-        logging.info('Deep learning pipeline finished running.')
+        logging.info('Pipeline run is complete.')
 
 
 def _to_dict(s):

@@ -57,7 +57,7 @@ class TrainValDataset(Dataset):
 
 
 class TestDataset(Dataset):
-    def __init__(self, data, context=0):
+    def __init__(self, data, labels, context=0):
 
         # read in data from file
         # build single numpy array out of utterances

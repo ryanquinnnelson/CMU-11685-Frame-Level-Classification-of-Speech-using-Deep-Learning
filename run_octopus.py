@@ -18,7 +18,7 @@ def main():
     oct = octopus.Octopus(config)
     oct.setup_environment()
     oct.download_data()
-    # oct.run_pipeline()
+    oct.run_pipeline()
 
 
 if __name__ == "__main__":

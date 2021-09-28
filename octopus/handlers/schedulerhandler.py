@@ -16,6 +16,7 @@ ReduceLROnPlateau: Reduce learning rate when a metric has stopped improving
 - patience
 - mode (Note: if we want the metrics to be large (i.e. accuracy), we should set mode='max')
 """
+import logging
 
 import torch.optim as optim
 
@@ -39,6 +40,7 @@ class SchedulerHandler:
         elif self.scheduler_type == 'ReduceLROnPlateau':
             scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, **self.scheduler_kwargs)
 
+        logging.info(f'Scheduler initialized.\n{scheduler.__str__()}')
         return scheduler
 
     def update_scheduler(self, scheduler, plateau_metric):
