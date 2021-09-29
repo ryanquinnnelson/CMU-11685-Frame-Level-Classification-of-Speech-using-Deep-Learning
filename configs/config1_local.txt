@@ -1,0 +1,66 @@
+[DEFAULT]
+
+[debug]
+debug_file = /Users/ryanqnelson/Desktop/test/debug.log
+
+[kaggle]
+kaggle_dir = /Users/ryanqnelson/Desktop/test/.kaggle
+token_file = /Users/ryanqnelson/Desktop/test/kaggle.json
+competition = hw1p2-toy-problem
+delete_zipfiles = True
+
+[wandb]
+entity = ryanquinnnelson
+name = Run-01
+project = CMU-11685-HW1P2-octopus-3
+notes = Simple MLP
+tags = MLP,octopus
+
+[earlystop]
+comparison_metric=val_loss
+comparison_best_is_max=False
+comparison_patience=20
+
+[data]
+data_dir = /Users/ryanqnelson/Desktop/test/content
+output_dir = /Users/ryanqnelson/Desktop/test/output
+train_data_file=toy_train_data.npy
+train_label_file=toy_train_label.npy
+val_data_file=toy_val_data.npy
+val_label_file=toy_val_label.npy
+test_data_file=toy_test_data.npy
+
+# input is (2 * context + 1) * 40
+input_size=200
+#1640  
+output_size=71
+
+[model]
+model_type=MLP
+
+[checkpoint]
+checkpoint_dir = /Users/ryanqnelson/Desktop/test/checkpoints
+delete_existing_checkpoints = True
+load_from_checkpoint=False
+checkpoint_file = None
+
+[hyperparameters]
+dataloader_num_workers=8
+dataloader_pin_memory=True
+dataloader_batch_size=128
+dataset_kwargs=context=2
+num_epochs = 30
+hidden_layer_sizes = 128
+dropout_rate=0.0
+batch_norm=False
+activation_func=ReLU
+criterion_type=CrossEntropyLoss
+optimizer_type=Adam
+optimizer_kwargs=lr=0.001
+scheduler_type=ReduceLROnPlateau
+scheduler_kwargs=factor=0.1,patience=5,mode=max,verbose=True
+scheduler_plateau_metric=val_acc
+
+
+
+

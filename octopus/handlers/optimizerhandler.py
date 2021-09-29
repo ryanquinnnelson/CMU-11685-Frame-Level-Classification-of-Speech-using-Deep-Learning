@@ -16,6 +16,5 @@ class OptimizerHandler:
         opt = None
         if self.optimizer_type == 'Adam':
             opt = optim.Adam(model.parameters(), **self.optimizer_kwargs)
-
         logging.info(f'Optimizer initialized:\n{opt}')
         return opt

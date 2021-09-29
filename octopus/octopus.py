@@ -7,7 +7,7 @@ import os
 import sys
 
 # execute before loading torch
-os.environ['CUDA_LAUNCH_BLOCKING'] = "1"   # better error tracking from gpu
+os.environ['CUDA_LAUNCH_BLOCKING'] = "1"  # better error tracking from gpu
 
 # local modules
 from octopus.connectors.kaggleconnector import KaggleConnector
@@ -28,6 +28,7 @@ class Octopus:
     def __init__(self, config):
         # logging
         _setup_logging(config['debug']['debug_file'])
+        self._draw_logo()
         logging.info('Initializing octopus...')
 
         # save configuration
@@ -171,6 +172,26 @@ class Octopus:
     def cleanup(self):
         logging.info('octopus shutdown complete.')
 
+    def _draw_logo(self):
+        logging.info('              _---_')
+        logging.info('            /       \\')
+        logging.info('           |         |')
+        logging.info('   _--_    |         |    _--_')
+        logging.info('  /__  \\   \\  0   0  /   /  __\\')
+        logging.info('     \\  \\   \\       /   /  /')
+        logging.info('      \\  -__-       -__-  /')
+        logging.info('  |\\   \\    __     __    /   /|')
+        logging.info('  | \\___----         ----___/ |')
+        logging.info('  \\                           /')
+        logging.info('   --___--/    / \\    \\--___--')
+        logging.info('         /    /   \\    \\')
+        logging.info('   --___-    /     \\    -___--')
+        logging.info('   \\_    __-         -__    _/')
+        logging.info('     ----               ----')
+        logging.info('')
+        logging.info('       O  C  T  O  P  U  S')
+        logging.info('')
+
 
 def _to_dict(s):
     d = dict()
@@ -209,3 +230,6 @@ def _setup_logging(debug_file):
                         format="%(asctime)s [%(levelname)s] %(message)s",
                         handlers=[logging.FileHandler(debug_file), logging.StreamHandler(sys.stdout)]
                         )
+
+
+
