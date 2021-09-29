@@ -45,7 +45,6 @@ class SchedulerHandler:
         return scheduler
 
     def update_scheduler(self, scheduler, stats):
-
         if self.scheduler_type == 'ReduceLROnPlateau':
             metric_val = stats[self.scheduler_plateau_metric][-1]
             scheduler.step(metric_val)

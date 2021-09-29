@@ -101,7 +101,7 @@ class Octopus:
         # scheduler
         self.schedulerhandler = SchedulerHandler(config['hyperparameters']['scheduler_type'],
                                                  _to_dict(config['hyperparameters']['scheduler_kwargs']),
-                                                 config['stats']['val_metric_name'])
+                                                 config['hyperparameters']['scheduler_plateau_metric'])
 
         # statshandler
         self.statshandler = StatsHandler(config['stats']['val_metric_name'],

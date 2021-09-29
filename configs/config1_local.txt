@@ -59,7 +59,7 @@ optimizer_type=Adam
 optimizer_kwargs=lr=0.001
 scheduler_type=ReduceLROnPlateau
 scheduler_kwargs=factor=0.1,patience=5,mode=max,verbose=True
-scheduler_plateau_metric=val_metric
+scheduler_plateau_metric=val_acc
 
 
 
