@@ -93,5 +93,3 @@ class StatsHandler:
         self.stats['train_loss'].append(train_loss)
         self.stats['val_loss'].append(val_loss)
         self.stats[self.val_metric_name].append(val_metric)
-
-        print(f'current stats:\n{self.stats}')
