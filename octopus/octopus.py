@@ -7,6 +7,7 @@ import os
 import sys
 
 # execute before loading torch
+import customized.customized
 import customized.output
 
 os.environ['CUDA_LAUNCH_BLOCKING'] = "1"  # better error tracking from gpu
@@ -22,8 +23,13 @@ from octopus.handlers.criterionhandler import CriterionHandler
 from octopus.handlers.optimizerhandler import OptimizerHandler
 from octopus.handlers.schedulerhandler import SchedulerHandler
 from octopus.handlers.traininghandler import TrainingHandler
-import customized.datasets as datasets
-import customized.output as output
+from octopus.handlers.statshandler import StatsHandler
+from octopus.handlers.phasehandler import PhaseHandler
+from octopus.phases.training import Training
+from octopus.phases.testing import Testing
+
+# customized to this data
+from customized.customized import Evaluation, TrainValDataset, TestDataset, OutputFormatter
 
 
 class Octopus:
@@ -58,6 +64,9 @@ class Octopus:
                                                    config['wandb']['name'],
                                                    config['checkpoint'].getboolean('load_from_checkpoint'))
 
+        # criterion
+        self.criterionhandler = CriterionHandler(config['hyperparameters']['criterion_type'])
+
         # data
         if config.has_option('data', 'test_label_file'):
             test_label_file = config['data']['test_label_file']
@@ -89,29 +98,38 @@ class Octopus:
                                          config['hyperparameters'].getfloat('dropout_rate'),
                                          config['hyperparameters'].getboolean('batch_norm'))
 
-        # criterion
-        self.criterionhandler = CriterionHandler(config['hyperparameters']['criterion_type'])
-
         # optimizer
         self.optimizerhandler = OptimizerHandler(config['hyperparameters']['optimizer_type'],
                                                  _to_dict(config['hyperparameters']['optimizer_kwargs']), )
+
         # scheduler
         self.schedulerhandler = SchedulerHandler(config['hyperparameters']['scheduler_type'],
-                                                 _to_dict(config['hyperparameters']['scheduler_kwargs']))
+                                                 _to_dict(config['hyperparameters']['scheduler_kwargs']),
+                                                 config['stats']['val_metric_name'])
 
-        # training
+        # statshandler
+        self.statshandler = StatsHandler(config['stats']['val_metric_name'],
+                                         config['stats']['comparison_metric'],
+                                         config['stats'].getboolean('comparison_best_is_max'),
+                                         config['stats'].getint('comparison_patience'))
+
+        # phasehandler
         if config.has_option('checkpoint', 'checkpoint_file'):
             checkpoint_file = config['checkpoint']['checkpoint_file']
         else:
             checkpoint_file = None
         first_epoch = 1
-        self.traininghandler = TrainingHandler(config['checkpoint'].getboolean('load_from_checkpoint'),
-                                               first_epoch,
-                                               config['hyperparameters'].getint('num_epochs'),
-                                               config['earlystop']['comparison_metric'],
-                                               config['earlystop'].getboolean('comparison_best_is_max'),
-                                               config['earlystop'].getint('comparison_patience'),
-                                               checkpoint_file)
+        self.phasehandler = PhaseHandler(first_epoch,
+                                         config['hyperparameters'].getint('num_epochs'),
+                                         self.datahandler,
+                                         self.devicehandler,
+                                         self.statshandler,
+                                         self.checkpointhandler,
+                                         self.schedulerhandler,
+                                         self.wandbconnector,
+                                         OutputFormatter,
+                                         config['checkpoint'].getboolean('load_from_checkpoint'),
+                                         checkpoint_file)
 
         logging.info('octopus initialization is complete.')
 
@@ -159,22 +177,20 @@ class Octopus:
         scheduler = self.schedulerhandler.get_scheduler(optimizer)
 
         # load data
-        train_loader, val_loader, test_loader = self.datahandler.load(datasets.TrainValDataset,
-                                                                      datasets.TrainValDataset, datasets.TestDataset,
+        train_loader, val_loader, test_loader = self.datahandler.load(TrainValDataset,
+                                                                      TrainValDataset,
+                                                                      TestDataset,
                                                                       self.devicehandler)
 
-        # train and test model
-        self.traininghandler.run_training_epochs(train_loader, val_loader, test_loader, model, optimizer, scheduler,
-                                                 loss_func,
-                                                 output.evaluate_batch, output.evaluate_epoch, output.format_output,
-                                                 self.datahandler,
-                                                 self.devicehandler, self.checkpointhandler,
-                                                 self.schedulerhandler, self.wandbconnector)
+        # load phases
+        training = Training(train_loader, loss_func, self.devicehandler)
+        evaluation = Evaluation(val_loader, loss_func, self.devicehandler)
+        testing = Testing(test_loader, self.devicehandler)
+
+        # run epochs
+        self.phasehandler.process_epochs(model, optimizer, scheduler, training, evaluation, testing)
 
         logging.info('octopus has finished running the pipeline.')
-
-    def run_pipeline2(self):
-        pass
 
     def cleanup(self):
         logging.info('octopus shutdown complete.')

@@ -4,20 +4,18 @@ import numpy as np
 
 
 class Testing:
-    def __init__(self, model, test_loader, devicehandler, num_epochs):
-        self.model = model
+    def __init__(self, test_loader, devicehandler):
         self.test_loader = test_loader
         self.devicehandler = devicehandler
-        self.num_epochs = num_epochs
 
-    def test_model(self, epoch):
-        logging.info(f'Running epoch {epoch}/{self.num_epochs} of testing...')
+    def test_model(self, epoch, num_epochs, model):
+        logging.info(f'Running epoch {epoch}/{num_epochs} of testing...')
         output = []
 
         with torch.no_grad():  # deactivate autograd engine to improve efficiency
 
             # Set model in validation mode
-            self.model.eval()
+            model.eval()
 
             # process mini-batches
             for batch in self.test_loader:
@@ -32,10 +30,10 @@ class Testing:
                     targets = None
 
                 # prep
-                inputs, targets = self.devicehandler.move_data_to_device(self.model, inputs, targets)
+                inputs, targets = self.devicehandler.move_data_to_device(model, inputs, targets)
 
                 # forward pass
-                out = self.model.forward(inputs)
+                out = model.forward(inputs)
 
                 # capture output for mini-batch
                 out = out.cpu().detach().numpy()  # extract from gpu if necessary

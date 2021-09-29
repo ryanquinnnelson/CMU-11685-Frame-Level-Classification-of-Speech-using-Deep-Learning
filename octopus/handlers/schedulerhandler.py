@@ -23,9 +23,10 @@ import torch.optim as optim
 
 class SchedulerHandler:
 
-    def __init__(self, scheduler_type, scheduler_kwargs):
+    def __init__(self, scheduler_type, scheduler_kwargs, scheduler_plateau_metric):
         self.scheduler_type = scheduler_type
         self.scheduler_kwargs = scheduler_kwargs
+        self.scheduler_plateau_metric = scheduler_plateau_metric
 
     def get_scheduler(self, optimizer):
         scheduler = None
@@ -43,9 +44,10 @@ class SchedulerHandler:
         logging.info(f'Scheduler initialized:\n{scheduler}\n{scheduler.state_dict()}')
         return scheduler
 
-    def update_scheduler(self, scheduler, plateau_metric):
+    def update_scheduler(self, scheduler, stats):
 
         if self.scheduler_type == 'ReduceLROnPlateau':
-            scheduler.step(plateau_metric)
+            metric_val = stats[self.scheduler_plateau_metric][-1]
+            scheduler.step(metric_val)
         else:
             scheduler.step()
