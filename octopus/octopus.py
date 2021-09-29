@@ -44,7 +44,7 @@ class Octopus:
                                                config['data']['data_dir'],
                                                config['kaggle']['token_file'],
                                                config['kaggle']['competition'],
-                                               config['kaggle'].getboolean('delete_zipfiles'))
+                                               config['kaggle'].getboolean('delete_zipfiles_after_unzipping'))
 
         # wandb
         self.wandbconnector = WandbConnector(config['wandb']['entity'],

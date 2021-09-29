@@ -7,7 +7,7 @@ debug_file = /Users/ryanqnelson/Desktop/test/debug.log
 kaggle_dir = /Users/ryanqnelson/Desktop/test/.kaggle
 token_file = /Users/ryanqnelson/Desktop/test/kaggle.json
 competition = hw1p2-toy-problem
-delete_zipfiles = True
+delete_zipfiles_after_unzipping = True
 
 [wandb]
 entity = ryanquinnnelson
@@ -17,9 +17,16 @@ notes = Simple MLP
 tags = MLP,octopus
 
 [stats]
+# metric for comparison against previous runs to check whether early stopping should occur
 comparison_metric=val_loss
+
+# if a lower value is better for the metric, set comparison_best_is_max to False
 comparison_best_is_max=False
+
+# how many epochs to allow the current model to perform worse than the best model for this metric before stopping
 comparison_patience=20
+
+# name of the metric that evaluate_model() returns in the second position of the tuple, for stats purposes
 val_metric_name=val_acc
 
 [data]
@@ -31,7 +38,7 @@ val_data_file=toy_val_data.npy
 val_label_file=toy_val_label.npy
 test_data_file=toy_test_data.npy
 
-# input is (2 * context + 1) * 40
+# input is (2 * context + 1) * 40 for this dataset
 input_size=200
 output_size=71
 
@@ -42,12 +49,16 @@ model_type=MLP
 checkpoint_dir = /Users/ryanqnelson/Desktop/test/checkpoints
 delete_existing_checkpoints = True
 load_from_checkpoint=False
+
+# if loading from a checkpoint, supply a fully qualified filename for the checkpoint file
 checkpoint_file =  None
 
 [hyperparameters]
 dataloader_num_workers=8
 dataloader_pin_memory=True
 dataloader_batch_size=128
+
+# keyword arguments to be supplied to Dataset subclasses when loading data
 dataset_kwargs=context=2
 num_epochs = 30
 hidden_layer_sizes = 128
@@ -56,11 +67,13 @@ batch_norm=False
 activation_func=ReLU
 criterion_type=CrossEntropyLoss
 optimizer_type=Adam
+
+# keyword arguments to be supplied when initializing the optimizer
 optimizer_kwargs=lr=0.001
 scheduler_type=ReduceLROnPlateau
+
+# keyword arguments to be supplied when initializing the scheduler
 scheduler_kwargs=factor=0.1,patience=5,mode=max,verbose=True
+
+# name of the metric stored in stats that the scheduler uses (if necessary) to determine its step
 scheduler_plateau_metric=val_acc
-
-
-
-

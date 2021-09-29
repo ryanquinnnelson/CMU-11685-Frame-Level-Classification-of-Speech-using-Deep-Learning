@@ -2,6 +2,10 @@
 All things related to schedulers.
 """
 
+import logging
+
+import torch.optim as optim
+
 """
 StepLR: Decays the learning rate of each parameter group by gamma every step_size epochs
 - step_size
@@ -16,9 +20,6 @@ ReduceLROnPlateau: Reduce learning rate when a metric has stopped improving
 - patience
 - mode (Note: if we want the metrics to be large (i.e. accuracy), we should set mode='max')
 """
-import logging
-
-import torch.optim as optim
 
 
 class SchedulerHandler:

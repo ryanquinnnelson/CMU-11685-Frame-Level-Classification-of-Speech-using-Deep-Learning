@@ -11,19 +11,20 @@ delete_zipfiles = True
 
 [wandb]
 entity = ryanquinnnelson
-name = Run-03
+name = Run-04
 project = CMU-11685-HW1P2-octopus-3
 notes = Simple MLP
 tags = MLP,octopus
 
-[earlystop]
+[stats]
 comparison_metric=val_acc
 comparison_best_is_max=True
-comparison_patience=5
+comparison_patience=20
+val_metric_name=val_acc
 
 [data]
 data_dir = /home/ubuntu/content
-output_dir = /home/ubuntu/output
+output_dir = /dev/nvme1n1/data/output
 train_data_file=train.npy
 train_label_file=train_labels.npy
 val_data_file=dev.npy
@@ -32,14 +33,13 @@ test_data_file=test.npy
 
 # input is (2 * context + 1) * 40
 input_size=1640
-#1640  
 output_size=71
 
 [model]
 model_type=MLP
 
 [checkpoint]
-checkpoint_dir = /home/ubuntu/checkpoints
+checkpoint_dir = /dev/nvme1n1/data/checkpoints
 delete_existing_checkpoints = True
 load_from_checkpoint=False
 checkpoint_file = None
