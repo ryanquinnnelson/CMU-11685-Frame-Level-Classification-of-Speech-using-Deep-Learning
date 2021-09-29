@@ -41,7 +41,8 @@ class Octopus:
                                                config['kaggle'].getboolean('delete_zipfiles'))
 
         # wandb
-        self.wandbconnector = WandbConnector(config['wandb']['name'],
+        self.wandbconnector = WandbConnector(config['wandb']['entity'],
+                                             config['wandb']['name'],
                                              config['wandb']['project'],
                                              config['wandb']['notes'],
                                              _to_string_list(config['wandb']['tags']),
@@ -103,6 +104,9 @@ class Octopus:
         self.traininghandler = TrainingHandler(config['checkpoint'].getboolean('load_from_checkpoint'),
                                                first_epoch,
                                                config['hyperparameters'].getint('num_epochs'),
+                                               config['earlystop']['comparison_metric'],
+                                               config['earlystop'].getboolean('comparison_best_is_max'),
+                                               config['earlystop'].getint('comparison_patience'),
                                                checkpoint_file)
 
         logging.info('octopus initialization is complete.')

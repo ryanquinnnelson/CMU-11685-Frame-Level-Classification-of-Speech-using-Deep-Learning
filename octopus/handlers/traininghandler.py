@@ -121,11 +121,17 @@ def test_model(epoch, num_epochs, test_loader, model, devicehandler):
 
 class TrainingHandler:
 
-    def __init__(self, load_from_checkpoint, first_epoch, num_epochs, checkpoint_file=None):
+    def __init__(self, load_from_checkpoint, first_epoch, num_epochs, comparison_metric, comparison_best_is_max,
+                 comparison_patience,
+                 checkpoint_file=None):
         self.load_from_checkpoint = load_from_checkpoint
         self.checkpoint_file = checkpoint_file
         self.first_epoch = first_epoch
         self.num_epochs = num_epochs
+        self.comparison_metric = comparison_metric
+        self.best_is_max = comparison_best_is_max
+        self.comparison_patience = comparison_patience
+        self.num_epochs_below_best_model = 0
 
         # setup tracking variables and early stopping criteria
         self.stats = {'max_val_acc': -1.0,
@@ -136,7 +142,7 @@ class TrainingHandler:
                       'runtime': [],
                       'epoch': []}
 
-    def load_checkpoint(self, devicehandler, checkpointhandler, model, optimizer, scheduler):
+    def _load_checkpoint(self, devicehandler, checkpointhandler, model, optimizer, scheduler):
         device = devicehandler.get_device()
         checkpoint = checkpointhandler.load(self.checkpoint_file, device, model, optimizer, scheduler)
 
@@ -146,10 +152,44 @@ class TrainingHandler:
         # set which epoch to start from
         self.first_epoch = checkpoint['next_epoch']
 
-    def stopping_criteria_is_met(self):
+    def _model_is_worse_by_comparison_metric(self, epoch, wandbconnector):
+
+        # check whether the metric we are using for comparison against other runs
+        # is better than other runs for this epoch
+        logging.info('Checking whether comparison metric for current model is worse than the best model so far...')
+        best_name, best_val = wandbconnector.get_best_value(self.comparison_metric, epoch, self.best_is_max)
+        model_name = wandbconnector.run_name
+        model_val = self.stats[self.comparison_metric][-1]
+        print(f'best:\t{best_name}\t{best_val}\nmodel:\t{model_name}\t{model_val}')
+
+        if best_val is not None:
+            # compare values for this epoch
+            if model_val < best_val:
+                model_is_worse = True
+                logging.info('A previous model has the best value for the comparison metric for this epoch.')
+            else:
+                logging.info('Current model has the best value for the comparison metric for this epoch.')
+                model_is_worse = False
+        else:
+            # no model to compare against for this epoch
+            model_is_worse = False
+
+        return model_is_worse
+
+    def _stopping_criteria_is_met(self, epoch, wandbconnector):
         logging.info('Checking early stopping criteria...')
 
-        stopping_criteria_met = False
+        model_is_worse = self._model_is_worse_by_comparison_metric(epoch, wandbconnector)
+        if model_is_worse:
+            self.num_epochs_below_best_model += 1
+            logging.info(f'Number of epochs below best model:{self.num_epochs_below_best_model}')
+            logging.info('Number of epochs model is allowed to be below best model ' +
+                         f'before stopping:{self.comparison_patience}')
+
+        if self.num_epochs_below_best_model > self.comparison_patience:
+            stopping_criteria_met = True
+        else:
+            stopping_criteria_met = False
 
         if stopping_criteria_met:
             logging.info('Early stopping criteria is met.')
@@ -158,7 +198,7 @@ class TrainingHandler:
 
         return stopping_criteria_met
 
-    def report_stats(self, wandbconnector):
+    def _report_stats(self, wandbconnector):
 
         # update best model
         updates_dict = {'best_epoch': self.stats['max_val_acc_epoch'],
@@ -174,7 +214,7 @@ class TrainingHandler:
         wandbconnector.log_stats(epoch_stats)
         logging.info(f'stats:{epoch_stats}')
 
-    def collect_stats(self, epoch, train_loss, val_loss, val_acc, start, end):
+    def _collect_stats(self, epoch, train_loss, val_loss, val_acc, start, end):
 
         # calculate runtime
         runtime = end - start
@@ -196,7 +236,7 @@ class TrainingHandler:
 
         # load checkpoint if necessary
         if self.load_from_checkpoint:
-            self.load_checkpoint(devicehandler, checkpointhandler, model, optimizer, scheduler)
+            self._load_checkpoint(devicehandler, checkpointhandler, model, optimizer, scheduler)
 
         # run epochs
         for epoch in range(self.first_epoch, self.num_epochs + 1):
@@ -207,7 +247,8 @@ class TrainingHandler:
             train_loss = train_model(epoch, self.num_epochs, train_loader, model, loss_func, devicehandler, optimizer)
 
             # validate
-            val_loss, val_acc = evaluate_model(epoch, self.num_epochs, val_loader, model, loss_func, devicehandler, acc_func)
+            val_loss, val_acc = evaluate_model(epoch, self.num_epochs, val_loader, model, loss_func, devicehandler,
+                                               acc_func)
 
             # test
             out = test_model(epoch, self.num_epochs, test_loader, model, devicehandler)
@@ -216,8 +257,8 @@ class TrainingHandler:
 
             # stats
             end = time.time()
-            self.collect_stats(epoch, train_loss, val_loss, val_acc, start, end)
-            self.report_stats(wandbconnector)
+            self._collect_stats(epoch, train_loss, val_loss, val_acc, start, end)
+            self._report_stats(wandbconnector)
 
             # scheduler
             schedulerhandler.update_scheduler(scheduler, val_acc)
@@ -226,6 +267,6 @@ class TrainingHandler:
             checkpointhandler.save(model, optimizer, scheduler, epoch + 1, self.stats)
 
             # check if early stopping criteria is met
-            if self.stopping_criteria_is_met():
+            if self._stopping_criteria_is_met(epoch, wandbconnector):
                 logging.info('Early stopping criteria is met. Stopping the training process...')
                 break  # stop running epochs
