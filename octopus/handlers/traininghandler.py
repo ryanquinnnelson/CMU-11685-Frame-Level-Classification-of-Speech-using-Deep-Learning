@@ -272,7 +272,6 @@ class TrainingHandler:
 
             # scheduler
             schedulerhandler.update_scheduler(scheduler, val_acc)
-            logging.info(f'lr={optimizer.state_dict()["param_groups"][0]["lr"]}')
 
             # save model checkpoint
             checkpointhandler.save(model, optimizer, scheduler, epoch + 1, self.stats)
