@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Follows the steps outlined on StackOverflow:
+# https://stackoverflow.com/questions/45167717/mounting-a-nvme-disk-on-aws-ec2/64709212#64709212
+
 echo "Listing block devices..."
 lsblk
 echo

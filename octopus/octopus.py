@@ -28,7 +28,7 @@ class Octopus:
     def __init__(self, config):
         # logging
         _setup_logging(config['debug']['debug_file'])
-        self._draw_logo()
+        _draw_logo()
         logging.info('Initializing octopus...')
 
         # save configuration
@@ -172,26 +172,6 @@ class Octopus:
     def cleanup(self):
         logging.info('octopus shutdown complete.')
 
-    def _draw_logo(self):
-        logging.info('              _---_')
-        logging.info('            /       \\')
-        logging.info('           |         |')
-        logging.info('   _--_    |         |    _--_')
-        logging.info('  /__  \\   \\  0   0  /   /  __\\')
-        logging.info('     \\  \\   \\       /   /  /')
-        logging.info('      \\  -__-       -__-  /')
-        logging.info('  |\\   \\    __     __    /   /|')
-        logging.info('  | \\___----         ----___/ |')
-        logging.info('  \\                           /')
-        logging.info('   --___--/    / \\    \\--___--')
-        logging.info('         /    /   \\    \\')
-        logging.info('   --___-    /     \\    -___--')
-        logging.info('   \\_    __-         -__    _/')
-        logging.info('     ----               ----')
-        logging.info('')
-        logging.info('       O  C  T  O  P  U  S')
-        logging.info('')
-
 
 def _to_dict(s):
     d = dict()
@@ -232,4 +212,22 @@ def _setup_logging(debug_file):
                         )
 
 
-
+def _draw_logo():
+    logging.info('              _---_')
+    logging.info('            /       \\')
+    logging.info('           |         |')
+    logging.info('   _--_    |         |    _--_')
+    logging.info('  /__  \\   \\  0   0  /   /  __\\')
+    logging.info('     \\  \\   \\       /   /  /')
+    logging.info('      \\  -__-       -__-  /')
+    logging.info('  |\\   \\    __     __    /   /|')
+    logging.info('  | \\___----         ----___/ |')
+    logging.info('  \\                           /')
+    logging.info('   --___--/    / \\    \\--___--')
+    logging.info('         /    /   \\    \\')
+    logging.info('   --___-    /     \\    -___--')
+    logging.info('   \\_    __-         -__    _/')
+    logging.info('     ----               ----')
+    logging.info('')
+    logging.info('       O  C  T  O  P  U  S')
+    logging.info('')
