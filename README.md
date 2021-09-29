@@ -36,29 +36,33 @@ Fall 2021 Introduction to Deep Learning - Homework 1 Part 2
     - `OutputFormatter`
     - `Evaluation`
 
-
-
 #### TrainValDataset
+
 - Defines Training and Evaluation datasets.
 - Subclass of `torch.utils.data.Dataset`
 - Implements standard Dataset methods: `__init__()`, `__len__()`, `__getitem__()`
 
 #### TestDataset
+
 - Defines Testing dataset.
 - Subclass of `torch.utils.data.Dataset`
 - Implements standard Dataset methods: `__init__()`, `__len__()`, `__getitem__()`
 
 #### OutputFormatter
-- Defines how output from test should be formatted to meet Kaggle requirements.
+
+- Defines how output from test should be formatted to meet Kaggle requirements. Output from `format()` will be saved to
+  file.
 - Implements: `format(self, out) -> DataFrame`
 
 #### Evaluation
-- Defines the evaluation process for each epoch. 
+
+- Defines the evaluation process for each epoch.
 - Implements: `__init__(self, val_loader, criterion_func, devicehandler)`
 - Implements: `evaluate_model(self, epoch, num_epochs, model) -> (val_loss, val_metric)`
 - Note that val_metric is a generic name. Match the actual metric returned in that position to the config file.
 
 ### How to run
+
 Module requires a single argument - the path to the configuration file.
 
 ```bash
