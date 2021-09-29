@@ -1,7 +1,7 @@
 # CMU-11685-HW1P2
 Fall 2021 Introduction to Deep Learning - Homework 1 Part 2
 
-### Summary
+## Summary
 `octopus` is a python module that standardizes the execution of deep learning pipelines using pytorch.
 ```
                _---_
@@ -97,4 +97,12 @@ optimizer_kwargs=lr=0.001
 scheduler_type=ReduceLROnPlateau
 scheduler_kwargs=factor=0.1,patience=5,mode=max,verbose=True
 scheduler_plateau_metric=val_acc
+```
+
+## Additional Features
+Repository also includes a bash script `mount_drive.sh` which will mount a drive on an AWS EC2 instance and prepare it for use.
+
+### How to run
+```bash
+$ mount_drive.sh
 ```
