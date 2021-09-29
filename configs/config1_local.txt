@@ -12,7 +12,7 @@ delete_zipfiles = True
 [wandb]
 entity = ryanquinnnelson
 name = Run-01
-project = CMU-11685-HW1P2-octopus-3
+project = CMU-11685-HW1P2-octopus-4
 notes = Simple MLP
 tags = MLP,octopus
 
@@ -41,8 +41,8 @@ model_type=MLP
 [checkpoint]
 checkpoint_dir = /Users/ryanqnelson/Desktop/test/checkpoints
 delete_existing_checkpoints = True
-load_from_checkpoint=True
-checkpoint_file =  /Users/ryanqnelson/Desktop/test/checkpoints/Run-01.checkpoint.2.pt
+load_from_checkpoint=False
+checkpoint_file =  None
 
 [hyperparameters]
 dataloader_num_workers=8

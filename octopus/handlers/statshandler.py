@@ -82,6 +82,8 @@ class StatsHandler:
 
     def collect_stats(self, epoch, train_loss, val_loss, val_metric, start, end):
 
+        logging.info(f'Collecting stats for epoch {epoch}...')
+
         # calculate runtime
         runtime = end - start
 
@@ -91,3 +93,5 @@ class StatsHandler:
         self.stats['train_loss'].append(train_loss)
         self.stats['val_loss'].append(val_loss)
         self.stats[self.val_metric_name].append(val_metric)
+
+        print(f'current stats:\n{self.stats}')

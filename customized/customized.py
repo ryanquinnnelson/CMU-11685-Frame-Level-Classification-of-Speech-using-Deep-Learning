@@ -1,8 +1,6 @@
 import logging
 
 import torch
-
-import numpy as np
 from torch.nn import functional as F
 from torch.utils.data import Dataset
 import numpy as np

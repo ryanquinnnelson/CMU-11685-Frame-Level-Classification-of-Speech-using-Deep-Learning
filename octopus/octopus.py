@@ -7,9 +7,6 @@ import os
 import sys
 
 # execute before loading torch
-import customized.customized
-import customized.output
-
 os.environ['CUDA_LAUNCH_BLOCKING'] = "1"  # better error tracking from gpu
 
 # local modules
@@ -22,7 +19,6 @@ from octopus.handlers.modelhandler import ModelHandler
 from octopus.handlers.criterionhandler import CriterionHandler
 from octopus.handlers.optimizerhandler import OptimizerHandler
 from octopus.handlers.schedulerhandler import SchedulerHandler
-from octopus.handlers.traininghandler import TrainingHandler
 from octopus.handlers.statshandler import StatsHandler
 from octopus.handlers.phasehandler import PhaseHandler
 from octopus.phases.training import Training
@@ -127,7 +123,7 @@ class Octopus:
                                          self.checkpointhandler,
                                          self.schedulerhandler,
                                          self.wandbconnector,
-                                         OutputFormatter,
+                                         OutputFormatter(),
                                          config['checkpoint'].getboolean('load_from_checkpoint'),
                                          checkpoint_file)
 
