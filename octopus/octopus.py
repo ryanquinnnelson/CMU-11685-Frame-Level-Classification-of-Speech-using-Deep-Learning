@@ -7,6 +7,8 @@ import os
 import sys
 
 # execute before loading torch
+import customized.output
+
 os.environ['CUDA_LAUNCH_BLOCKING'] = "1"  # better error tracking from gpu
 
 # local modules
@@ -21,6 +23,7 @@ from octopus.handlers.optimizerhandler import OptimizerHandler
 from octopus.handlers.schedulerhandler import SchedulerHandler
 from octopus.handlers.traininghandler import TrainingHandler
 import customized.datasets as datasets
+import customized.output as output
 
 
 class Octopus:
@@ -163,11 +166,15 @@ class Octopus:
         # train and test model
         self.traininghandler.run_training_epochs(train_loader, val_loader, test_loader, model, optimizer, scheduler,
                                                  loss_func,
-                                                 datasets.acc_func, datasets.convert_output, self.datahandler,
+                                                 output.evaluate_batch, output.evaluate_epoch, output.format_output,
+                                                 self.datahandler,
                                                  self.devicehandler, self.checkpointhandler,
                                                  self.schedulerhandler, self.wandbconnector)
 
         logging.info('octopus has finished running the pipeline.')
+
+    def run_pipeline2(self):
+        pass
 
     def cleanup(self):
         logging.info('octopus shutdown complete.')

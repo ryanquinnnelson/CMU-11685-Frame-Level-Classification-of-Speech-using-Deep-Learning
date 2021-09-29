@@ -1,8 +1,11 @@
 # CMU-11685-HW1P2
+
 Fall 2021 Introduction to Deep Learning - Homework 1 Part 2
 
 ## Summary
+
 `octopus` is a python module that standardizes the execution of deep learning pipelines using pytorch.
+
 ```
                _---_
              /       \
@@ -22,19 +25,33 @@ Fall 2021 Introduction to Deep Learning - Homework 1 Part 2
  
         O  C  T  O  P  U  S
 ```
-### Requirements
-- configuration file: The file is expected to be in a format that python's `configparser` understands.
-- kaggle.json file: The module also requires a kaggle token file `kaggle.json` to be available.
 
+### Requirements
+
+- configuration file: The file is expected to be in a format that python's `configparser` understands.
+- kaggle.json file: The module also expects a kaggle token file `kaggle.json` to be available.
+- `customized` python module with two files
+    - `customized.datasets.py`
+       - defines custom `TrainValDataset` and `TestDataset` classes, both of which are subclasses
+      of `torch.utils.data.Dataset`.
+       - Each subclass define the interface between the data and the model.
+       - Each class must implement the following methods: `__init__()`, `__len__()`, `__getitem__()`.
+    - `customized.output.py`
+      - defines custom `KaggleFormatter` class which defines how to transform the output of the model into the format required for kaggle submissions.
+      - This class must implement the following method: `format(out)`.
 
 ### How to run
-Module requires a single argument - the path to the configuration file.  
+
+Module requires a single argument - the path to the configuration file.
+
 ```bash
 $ run_octopus.py /path/to/config.txt
 ```
 
 ### Configuration File requirements
+
 The following is an example of a configuration file. All configs are required. Values are fully customizable.
+
 ```text
 [DEFAULT]
 
@@ -100,9 +117,12 @@ scheduler_plateau_metric=val_acc
 ```
 
 ## Additional Features
-Repository also includes a bash script `mount_drive.sh` which will mount a drive on an AWS EC2 instance and prepare it for use.
+
+Repository also includes a bash script `mount_drive.sh` which will mount a drive on an AWS EC2 instance and prepare it
+for use.
 
 ### How to run
+
 ```bash
 $ mount_drive.sh
 ```

@@ -21,6 +21,7 @@ comparison_metric=val_loss
 comparison_best_is_max=False
 comparison_patience=20
 
+
 [data]
 data_dir = /Users/ryanqnelson/Desktop/test/content
 output_dir = /Users/ryanqnelson/Desktop/test/output
@@ -32,7 +33,6 @@ test_data_file=toy_test_data.npy
 
 # input is (2 * context + 1) * 40
 input_size=200
-#1640  
 output_size=71
 
 [model]
@@ -49,7 +49,7 @@ dataloader_num_workers=8
 dataloader_pin_memory=True
 dataloader_batch_size=128
 dataset_kwargs=context=2
-num_epochs = 30
+num_epochs = 3
 hidden_layer_sizes = 128
 dropout_rate=0.0
 batch_norm=False

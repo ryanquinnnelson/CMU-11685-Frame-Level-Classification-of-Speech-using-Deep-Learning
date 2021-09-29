@@ -1,3 +1,7 @@
+"""
+Defines custom Dataset subclasses for use in this pipeline.
+"""
+
 import torch
 import numpy as np
 import torch.nn.functional as F
@@ -99,27 +103,3 @@ class TestDataset(Dataset):
             item = self.data[t_index:b_index + 1]
 
         return item.flatten()
-
-
-def convert_output(out):
-    # convert 2D output to 1D a single class label (71 nodes into a single number per output)
-    out = np.argmax(out, axis=1)  # column with max value in each row is the index of the predicted label
-
-    return out
-
-
-def acc_func(out, actual):
-    """
-    out: 2D tensor (torch.FloatTensor), each row has 71 columns (one for each possible label)
-    actual: 1D tensor (torch.LongTensor)
-    """
-    # retrieve labels from device by converting to numpy arrays
-    actual = actual.cpu().detach().numpy()
-
-    # convert output to class labels
-    pred = convert_output(out)
-
-    # compare predictions against actual
-    n_hits = np.sum(pred == actual)
-
-    return n_hits

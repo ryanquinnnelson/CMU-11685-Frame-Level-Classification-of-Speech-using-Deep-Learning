@@ -136,7 +136,7 @@ class DataHandler:
 
         return train_dl, val_dl, test_dl
 
-    def save(self, out, epoch):
+    def save(self, df, epoch):
 
         # generate filename
         filename = f'{self.run_name}.epoch{epoch}.{datetime.now().strftime("%Y%m%d.%H.%M.%S")}.output.csv'
@@ -145,5 +145,4 @@ class DataHandler:
         logging.info(f'Saving test output to {path}...')
 
         # save output
-        df = pd.DataFrame(data=out)
-        df.to_csv(path, header=False)
+        df.to_csv(path, header=True, index=False)
