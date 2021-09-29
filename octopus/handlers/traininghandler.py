@@ -131,7 +131,7 @@ class TrainingHandler:
         self.comparison_metric = comparison_metric
         self.best_is_max = comparison_best_is_max
         self.comparison_patience = comparison_patience
-        self.num_epochs_below_best_model = 0
+        self.num_epochs_worse_than_best_model = 0
 
         # setup tracking variables and early stopping criteria
         self.stats = {'max_val_acc': -1.0,
@@ -162,9 +162,17 @@ class TrainingHandler:
         model_val = self.stats[self.comparison_metric][-1]
         print(f'best:\t{best_name}\t{best_val}\nmodel:\t{model_name}\t{model_val}')
 
-        if best_val is not None:
+        if best_val is not None and self.best_is_max:
             # compare values for this epoch
             if model_val < best_val:
+                model_is_worse = True
+                logging.info('A previous model has the best value for the comparison metric for this epoch.')
+            else:
+                logging.info('Current model has the best value for the comparison metric for this epoch.')
+                model_is_worse = False
+        elif best_val is not None and not self.best_is_max:  # best is min
+            # compare values for this epoch
+            if model_val > best_val:
                 model_is_worse = True
                 logging.info('A previous model has the best value for the comparison metric for this epoch.')
             else:
@@ -179,21 +187,23 @@ class TrainingHandler:
     def _stopping_criteria_is_met(self, epoch, wandbconnector):
         logging.info('Checking early stopping criteria...')
 
+        # criteria 1 - metric comparison
         model_is_worse = self._model_is_worse_by_comparison_metric(epoch, wandbconnector)
         if model_is_worse:
-            self.num_epochs_below_best_model += 1
-            logging.info(f'Number of epochs below best model:{self.num_epochs_below_best_model}')
-            logging.info('Number of epochs model is allowed to be below best model ' +
+            self.num_epochs_worse_than_best_model += 1
+            logging.info('Number of epochs in a row this model is worse than best model' +
+                         f':{self.num_epochs_worse_than_best_model}')
+            logging.info('Number of epochs in a row this model can be worse than best model ' +
                          f'before stopping:{self.comparison_patience}')
-
-        if self.num_epochs_below_best_model > self.comparison_patience:
-            stopping_criteria_met = True
         else:
-            stopping_criteria_met = False
+            self.num_epochs_worse_than_best_model = 0  # reset value
 
-        if stopping_criteria_met:
+        # check all criteria to determine if we need to stop learning
+        if self.num_epochs_worse_than_best_model > self.comparison_patience:
+            stopping_criteria_met = True
             logging.info('Early stopping criteria is met.')
         else:
+            stopping_criteria_met = False
             logging.info('Early stopping criteria is not met.')
 
         return stopping_criteria_met
