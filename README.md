@@ -4,7 +4,7 @@ Fall 2021 Introduction to Deep Learning - Homework 1 Part 2
 
 ## Summary
 
-`octopus` is a python module that standardizes the execution of deep learning pipelines using pytorch.
+`octopus` is a python module that standardizes the execution of deep learning pipelines using `pytorch`, `wandb`, and `kaggle`.
 
 ```
                _---_
