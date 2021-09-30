@@ -56,7 +56,7 @@ class Octopus:
 
         # checkpoints
         self.checkpointhandler = CheckpointHandler(config['checkpoint']['checkpoint_dir'],
-                                                   config['checkpoint']['delete_existing_checkpoints'],
+                                                   config['checkpoint'].getboolean('delete_existing_checkpoints'),
                                                    config['wandb']['name'],
                                                    config['checkpoint'].getboolean('load_from_checkpoint'))
 
