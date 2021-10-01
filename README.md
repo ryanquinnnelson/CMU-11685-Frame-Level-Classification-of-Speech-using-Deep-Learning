@@ -163,3 +163,19 @@ for use.
 ```bash
 $ mount_drive.sh
 ```
+
+
+## Improvement Ideas
+- Multiple configuration files
+  - Current: `octopus` executes the pipeline for a single configuration file.
+  - Improvement: If multiple configuration files are placed into a configuration folder, `octopus` will execute the pipeline for each configuration file.
+- wandb checkpoint metrics
+  - Current: When loading from checkpoint (and therefore starting from an epoch other than 1), the metrics sent to wandb will appear shifted relative to runs that sent metrics from epoch 1. For a previous run, the metric for epoch 1 is displayed as position 0 on wandb. For the checkpoint run, the metric for epoch X is displayed as position 0 on wandb.
+  - Improvement: wandb shifts over and displays the metrics from the checkpointed run in the correct position in its graphs. A few ways to do this: (1) If loading from a checkpoint, `octopus` sends dummy metrics to wandb for each of the epochs before the one that the pipeline starts on; (2) `octopus` sends  the actual metrics from all epochs stored in the checkpoint.
+- weight initializations
+  - Current: model uses default initializations
+  - Improvement: implement Kaiming Initialization or Xavier Initialization
+
+
+
+

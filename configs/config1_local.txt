@@ -11,7 +11,7 @@ delete_zipfiles_after_unzipping = True
 
 [wandb]
 entity = ryanquinnnelson
-name = Run-02
+name = Run-07
 project = CMU-11685-HW1P2-octopus-4
 notes = Simple MLP
 tags = MLP,octopus
