@@ -1,6 +1,7 @@
 """
 All things related to data reading and writing.
 """
+__author__ = 'ryanquinnnelson'
 
 import os
 import logging
@@ -85,7 +86,7 @@ class DataHandler:
             dl_args = dict(shuffle=True,
                            batch_size=self.batch_size)
 
-        logging.info(f'DataLoader settings for training dataset:\n{dl_args}')
+        logging.info(f'DataLoader settings for training dataset:{dl_args}')
         dl = DataLoader(dataset, **dl_args)
         return dl
 
@@ -100,7 +101,7 @@ class DataHandler:
             dl_args = dict(shuffle=False,
                            batch_size=self.batch_size)
 
-        logging.info(f'DataLoader settings for validation dataset:\n{dl_args}')
+        logging.info(f'DataLoader settings for validation dataset:{dl_args}')
         dl = DataLoader(dataset, **dl_args)
         return dl
 
@@ -115,7 +116,7 @@ class DataHandler:
             dl_args = dict(shuffle=False,
                            batch_size=self.batch_size)
 
-        logging.info(f'DataLoader settings for test dataset:\n{dl_args}')
+        logging.info(f'DataLoader settings for test dataset:{dl_args}')
         dl = DataLoader(dataset, **dl_args)
         return dl
 

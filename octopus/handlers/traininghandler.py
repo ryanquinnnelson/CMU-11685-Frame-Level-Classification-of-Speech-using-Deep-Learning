@@ -1,6 +1,7 @@
 """
 All things related to training models.
 """
+__author__ = 'ryanquinnnelson'
 
 import logging
 import time

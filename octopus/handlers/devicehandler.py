@@ -1,6 +1,8 @@
 """
 All things related to device.
 """
+__author__ = 'ryanquinnnelson'
+
 
 import logging
 

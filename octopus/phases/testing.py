@@ -1,3 +1,8 @@
+"""
+Defines the testing phase of model training.
+"""
+__author__ = 'ryanquinnnelson'
+
 import logging
 import torch
 import numpy as np

@@ -1,6 +1,7 @@
 """
 Performs environment setup for deep learning and runs a deep learning pipeline.
 """
+__author__ = 'ryanquinnnelson'
 
 import logging
 import os

@@ -1,6 +1,8 @@
 """
 All things related to managing training, evaluation, and testing phases.
 """
+__author__ = 'ryanquinnnelson'
+
 import logging
 import time
 

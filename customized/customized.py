@@ -1,3 +1,8 @@
+"""
+Implements custom classes that octopus needs to run the pipeline.
+"""
+__author__ = 'ryanquinnnelson'
+
 import logging
 
 import torch

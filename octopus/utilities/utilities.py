@@ -1,3 +1,8 @@
+"""
+Common utilities.
+"""
+__author__ = 'ryanquinnnelson'
+
 import logging
 import os
 import shutil

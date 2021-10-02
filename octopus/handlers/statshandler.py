@@ -1,3 +1,8 @@
+"""
+All things related to stats collection.
+"""
+__author__ = 'ryanquinnnelson'
+
 import logging
 
 

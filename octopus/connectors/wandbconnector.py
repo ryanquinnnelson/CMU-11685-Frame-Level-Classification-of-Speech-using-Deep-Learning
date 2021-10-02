@@ -1,6 +1,8 @@
 """
 All things related to wandb.
 """
+__author__ = 'ryanquinnnelson'
+
 import logging
 import subprocess
 

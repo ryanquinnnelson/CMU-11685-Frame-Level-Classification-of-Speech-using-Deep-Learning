@@ -1,6 +1,8 @@
 """
 All things related to optimizers.
 """
+__author__ = 'ryanquinnnelson'
+
 import logging
 
 import torch.optim as optim

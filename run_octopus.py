@@ -1,6 +1,7 @@
 """
 Runs octopus.
 """
+__author__ = 'ryanquinnnelson'
 
 import configparser
 import sys
@@ -18,8 +19,8 @@ def main():
     octopus = Octopus(config)
     octopus.setup_environment()
     octopus.download_data()
-    # octopus.run_pipeline()
-    # octopus.cleanup()
+    octopus.run_pipeline()
+    octopus.cleanup()
 
 
 if __name__ == "__main__":

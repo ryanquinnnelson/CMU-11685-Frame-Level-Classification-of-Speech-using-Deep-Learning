@@ -1,6 +1,7 @@
 """
 All things related to kaggle.
 """
+__author__ = 'ryanquinnnelson'
 
 import logging
 import os
