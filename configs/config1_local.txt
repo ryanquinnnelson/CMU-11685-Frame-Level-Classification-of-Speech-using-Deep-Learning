@@ -5,7 +5,7 @@ run_name = Run-07
 debug_file = /Users/ryanqnelson/Desktop/test/debug.log
 
 [kaggle]
-download_from_kaggle = True
+download_from_kaggle = False
 kaggle_dir = /Users/ryanqnelson/Desktop/test/.kaggle
 content_dir = /Users/ryanqnelson/Desktop/test/content/
 token_file = /Users/ryanqnelson/Desktop/kaggle.json
@@ -13,6 +13,7 @@ competition = hw1p2-toy-problem
 delete_zipfiles_after_unzipping = True
 
 [wandb]
+wandb_dir = /Users/ryanqnelson/Desktop/test
 entity = ryanquinnnelson
 project = CMU-11685-HW1P2-octopus-4
 notes = Simple MLP

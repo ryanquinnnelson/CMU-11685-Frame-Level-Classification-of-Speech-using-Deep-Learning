@@ -22,6 +22,7 @@ config['kaggle']['delete_zipfiles_after_unzipping'] = 'True'
 
 # wandb
 config['wandb'] = {}
+config['wandb']['wandb_dir'] = '/Users/ryanqnelson/Desktop/test/'
 config['wandb']['entity'] = 'ryanquinnnelson'
 config['wandb']['project'] = 'CMU-11685-HW1P2-octopus-4'
 config['wandb']['notes'] = 'Simple MLP'

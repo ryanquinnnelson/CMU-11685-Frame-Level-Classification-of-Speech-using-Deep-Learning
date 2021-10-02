@@ -50,7 +50,8 @@ class Octopus:
             self.kaggleconnector = None
 
         # wandb
-        self.wandbconnector = WandbConnector(config['wandb']['entity'],
+        self.wandbconnector = WandbConnector(config['wandb']['wandb_dir'],
+                                             config['wandb']['entity'],
                                              config['DEFAULT']['run_name'],
                                              config['wandb']['project'],
                                              config['wandb']['notes'],
