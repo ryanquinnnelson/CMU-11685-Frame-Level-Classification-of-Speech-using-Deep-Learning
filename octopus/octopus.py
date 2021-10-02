@@ -39,16 +39,19 @@ class Octopus:
         # save configuration
         self.config = config
 
-        # kaggle
-        self.kaggleconnector = KaggleConnector(config['kaggle']['kaggle_dir'],
-                                               config['data']['data_dir'],
-                                               config['kaggle']['token_file'],
-                                               config['kaggle']['competition'],
-                                               config['kaggle'].getboolean('delete_zipfiles_after_unzipping'))
+        if config['kaggle'].getboolean('download_from_kaggle'):
+            # kaggle
+            self.kaggleconnector = KaggleConnector(config['kaggle']['kaggle_dir'],
+                                                   config['kaggle']['content_dir'],
+                                                   config['kaggle']['token_file'],
+                                                   config['kaggle']['competition'],
+                                                   config['kaggle'].getboolean('delete_zipfiles_after_unzipping'))
+        else:
+            self.kaggleconnector = None
 
         # wandb
         self.wandbconnector = WandbConnector(config['wandb']['entity'],
-                                             config['wandb']['name'],
+                                             config['DEFAULT']['run_name'],
                                              config['wandb']['project'],
                                              config['wandb']['notes'],
                                              _to_string_list(config['wandb']['tags']),
@@ -57,7 +60,7 @@ class Octopus:
         # checkpoints
         self.checkpointhandler = CheckpointHandler(config['checkpoint']['checkpoint_dir'],
                                                    config['checkpoint'].getboolean('delete_existing_checkpoints'),
-                                                   config['wandb']['name'],
+                                                   config['DEFAULT']['run_name'],
                                                    config['checkpoint'].getboolean('load_from_checkpoint'))
 
         # criterion
@@ -68,8 +71,8 @@ class Octopus:
             test_label_file = config['data']['test_label_file']
         else:
             test_label_file = None
-        self.datahandler = DataHandler(config['wandb']['name'],
-                                       self.kaggleconnector.competition_dir,
+        self.datahandler = DataHandler(config['DEFAULT']['run_name'],
+                                       config['data']['data_dir'],
                                        config['data']['output_dir'],
                                        config['data']['train_data_file'],
                                        config['data']['train_label_file'],
@@ -136,7 +139,8 @@ class Octopus:
         self.wandbconnector.setup()
 
         # kaggle
-        self.kaggleconnector.setup()
+        if self.kaggleconnector:
+            self.kaggleconnector.setup()
 
         # checkpoint directory
         self.checkpointhandler.setup()
@@ -150,9 +154,13 @@ class Octopus:
         logging.info('octopus has finished setting up the environment.')
 
     def download_data(self):
-        logging.info('octopus is downloading data...')
-        self.kaggleconnector.download_and_unzip()
-        logging.info('octopus has finished downloading data.')
+        if self.kaggleconnector:
+            logging.info('octopus is downloading data...')
+            self.kaggleconnector.download_and_unzip()
+            logging.info('octopus has finished downloading data.')
+        else:
+            logging.info('octopus is not downloading data.')
+            logging.info(f'octopus expects data to be available in {self.datahandler.data_dir}.')
 
     def run_pipeline(self):
         """

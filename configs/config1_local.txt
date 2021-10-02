@@ -4,6 +4,7 @@
 debug_file = /Users/ryanqnelson/Desktop/test/debug.log
 
 [kaggle]
+download_from_kaggle = True
 kaggle_dir = /Users/ryanqnelson/Desktop/test/.kaggle
 token_file = /Users/ryanqnelson/Desktop/test/kaggle.json
 competition = hw1p2-toy-problem

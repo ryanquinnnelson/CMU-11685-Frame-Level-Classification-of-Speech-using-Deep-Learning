@@ -4,7 +4,8 @@ Fall 2021 Introduction to Deep Learning - Homework 1 Part 2
 
 ## Summary
 
-`octopus` is a python module that standardizes the execution of deep learning pipelines using `pytorch`, `wandb`, and `kaggle`.
+`octopus` is a python module that standardizes the execution of deep learning pipelines using `pytorch`, `wandb`,
+and `kaggle`.
 
 ```
                _---_
@@ -27,9 +28,10 @@ Fall 2021 Introduction to Deep Learning - Homework 1 Part 2
 ```
 
 ### Requirements
-
+- wandb account: wandb is used for model tracking and early stopping statistics.
+- kaggle account: `octopus` is configured to download data from kaggle via the api. This behavior can be turned off in the configs.
 - configuration file: The file is expected to be in a format that python's `configparser` understands.
-- kaggle.json file: The module also expects a kaggle token file `kaggle.json` to be available.
+- kaggle.json file: If `octopus` is going to download data from kaggle, it expects a kaggle token file `kaggle.json` to be available.
 - `customized` python module with one file `customized.py` that implements four classes:
     - `TrainValDataset`
     - `TestDataset`
@@ -37,26 +39,22 @@ Fall 2021 Introduction to Deep Learning - Homework 1 Part 2
     - `Evaluation`
 
 #### TrainValDataset
-
-- Defines Training and Evaluation datasets.
+Defines Training and Evaluation datasets for your data.
 - Subclass of `torch.utils.data.Dataset`
 - Implements standard Dataset methods: `__init__()`, `__len__()`, `__getitem__()`
 
 #### TestDataset
-
-- Defines Testing dataset.
+Defines Testing dataset for your data.
 - Subclass of `torch.utils.data.Dataset`
 - Implements standard Dataset methods: `__init__()`, `__len__()`, `__getitem__()`
 
 #### OutputFormatter
-
-- Defines how output from test should be formatted to meet Kaggle requirements. Output from `format()` will be saved to
-  file.
+Defines how output from the test set should be formatted to meet desired requirements (i.e. Kaggle submission).
+- Output from `format()` will be saved to file.
 - Implements: `format(self, out) -> DataFrame`
 
 #### Evaluation
-
-- Defines the evaluation process for each epoch.
+Defines the evaluation process for each epoch.
 - Implements: `__init__(self, val_loader, criterion_func, devicehandler)`
 - Implements: `evaluate_model(self, epoch, num_epochs, model) -> (val_loss, val_metric)`
 - Note that val_metric is a generic name. Match the actual metric returned in that position to the config file.
@@ -80,6 +78,7 @@ The following is an example of a configuration file. All configs are required. V
 debug_file = /Users/ryanqnelson/Desktop/test/debug.log
 
 [kaggle]
+download_from_kaggle = True
 kaggle_dir = /Users/ryanqnelson/Desktop/test/.kaggle
 token_file = /Users/ryanqnelson/Desktop/test/kaggle.json
 competition = hw1p2-toy-problem
@@ -164,17 +163,24 @@ for use.
 $ mount_drive.sh
 ```
 
-
 ## Improvement Ideas
+
 - Multiple configuration files
-  - Current: `octopus` executes the pipeline for a single configuration file.
-  - Improvement: If multiple configuration files are placed into a configuration folder, `octopus` will execute the pipeline for each configuration file.
+    - Current: `octopus` executes the pipeline for a single configuration file.
+    - Improvement: If multiple configuration files are placed into a configuration folder, `octopus` will execute the
+      pipeline for each configuration file.
 - wandb checkpoint metrics
-  - Current: When loading from checkpoint (and therefore starting from an epoch other than 1), the metrics sent to wandb will appear shifted relative to runs that sent metrics from epoch 1. For a previous run, the metric for epoch 1 is displayed as position 0 on wandb. For the checkpoint run, the metric for epoch X is displayed as position 0 on wandb.
-  - Improvement: wandb shifts over and displays the metrics from the checkpointed run in the correct position in its graphs. A few ways to do this: (1) If loading from a checkpoint, `octopus` sends dummy metrics to wandb for each of the epochs before the one that the pipeline starts on; (2) `octopus` sends  the actual metrics from all epochs stored in the checkpoint.
+    - Current: When loading from checkpoint (and therefore starting from an epoch other than 1), the metrics sent to
+      wandb will appear shifted relative to runs that sent metrics from epoch 1. For a previous run, the metric for
+      epoch 1 is displayed as position 0 on wandb. For the checkpoint run, the metric for epoch X is displayed as
+      position 0 on wandb.
+    - Improvement: wandb shifts over and displays the metrics from the checkpointed run in the correct position in its
+      graphs. A few ways to do this: (1) If loading from a checkpoint, `octopus` sends dummy metrics to wandb for each
+      of the epochs before the one that the pipeline starts on; (2) `octopus` sends the actual metrics from all epochs
+      stored in the checkpoint.
 - weight initializations
-  - Current: model uses default initializations
-  - Improvement: implement Kaiming Initialization or Xavier Initialization
+    - Current: model uses default initializations
+    - Improvement: implement Kaiming Initialization or Xavier Initialization
 
 
 

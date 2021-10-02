@@ -17,8 +17,8 @@ class KaggleConnector:
         self.content_dir = content_dir
         self.token_file = token_file
         self.competition = competition
-        self.competition_dir = os.path.join(content_dir, 'competitions', competition)
         self.delete_zipfiles = delete_zipfiles
+        self.competition_dir = os.path.join(content_dir, 'competitions', competition)
 
     def setup(self):
         logging.info('Setting up kaggle connector...')
