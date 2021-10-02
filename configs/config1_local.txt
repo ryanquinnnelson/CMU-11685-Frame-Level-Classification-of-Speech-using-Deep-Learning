@@ -5,7 +5,7 @@ run_name = Run-07
 debug_file = /Users/ryanqnelson/Desktop/test/debug.log
 
 [kaggle]
-download_from_kaggle = False
+download_from_kaggle = True
 kaggle_dir = /Users/ryanqnelson/Desktop/test/.kaggle
 content_dir = /Users/ryanqnelson/Desktop/test/content/
 token_file = /Users/ryanqnelson/Desktop/kaggle.json

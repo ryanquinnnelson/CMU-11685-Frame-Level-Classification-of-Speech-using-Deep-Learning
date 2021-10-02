@@ -55,7 +55,7 @@ class KaggleConnector:
         logging.info('Unzipping competition files...')
         # get filenames
         zipfiles = glob.glob(self.competition_dir + '/*.zip')
-
+        logging.info(f'Found the following zipped files:{zipfiles}.')
         # unzip each file
         for f in zipfiles:
             with zipfile.ZipFile(f, 'r') as zip_ref:
@@ -63,9 +63,9 @@ class KaggleConnector:
 
         # clean up original zipfile
         if self.delete_zipfiles:
+            logging.info('Removing zip files after extracting contents...')
             for f in zipfiles:
                 os.remove(f)
-
 
     def download_and_unzip(self):
         self.download()
