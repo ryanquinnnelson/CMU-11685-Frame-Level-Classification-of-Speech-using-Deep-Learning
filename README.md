@@ -2,6 +2,8 @@
 
 Fall 2021 Introduction to Deep Learning - Homework 1 Part 2
 
+Author: ryanquinnnelson
+
 ## Summary
 
 `octopus` is a python module that standardizes the execution of deep learning pipelines using `pytorch`, `wandb`,
@@ -27,52 +29,68 @@ and `kaggle`.
         O  C  T  O  P  U  S
 ```
 
-### Requirements
-- wandb account: wandb is used for model tracking and early stopping statistics.
-- kaggle account: `octopus` is configured to download data from kaggle via the api. This behavior can be turned off in the configs.
-- configuration file: The file is expected to be in a format that python's `configparser` understands.
-- kaggle.json file: If `octopus` is going to download data from kaggle, it expects a kaggle token file `kaggle.json` to be available.
-- `customized` python module with one file `customized.py` that implements four classes:
+## Run Requirements
+
+- wandb account: wandb is used for model tracking and early stopping statistics. There is currently no way to turn off
+  this behavior.
+- kaggle account: `octopus` is configured to download data from kaggle via the api. This behavior can be turned off in
+  the configs.
+- kaggle.json file: If `octopus` is going to download data from kaggle, it expects a kaggle token file `kaggle.json` to
+  be available. The file must contain your kaggle username and api key in the standard JSON format.
+- configuration file: The file is expected to be in a format that python's `configparser` understands. See example
+  below.
+- `customized` python module with one file `customized.py` that implements four classes. `octopus` comes with an example
+  customized file.
     - `TrainValDataset`
     - `TestDataset`
     - `OutputFormatter`
     - `Evaluation`
 
 #### TrainValDataset
+
 Defines Training and Evaluation datasets for your data.
+
 - Subclass of `torch.utils.data.Dataset`
 - Implements standard Dataset methods: `__init__()`, `__len__()`, `__getitem__()`
 
 #### TestDataset
+
 Defines Testing dataset for your data.
+
 - Subclass of `torch.utils.data.Dataset`
 - Implements standard Dataset methods: `__init__()`, `__len__()`, `__getitem__()`
 
 #### OutputFormatter
+
 Defines how output from the test set should be formatted to meet desired requirements (i.e. Kaggle submission).
+
 - Output from `format()` will be saved to file.
 - Implements: `format(self, out) -> DataFrame`
 
 #### Evaluation
+
 Defines the evaluation process for each epoch.
+
 - Implements: `__init__(self, val_loader, criterion_func, devicehandler)`
 - Implements: `evaluate_model(self, epoch, num_epochs, model) -> (val_loss, val_metric)`
 - Note that val_metric is a generic name. Match the actual metric returned in that position to the config file.
 
-### How to run
+## Steps to Run
 
-Module requires a single argument - the path to the configuration file.
+Module requires a single argument - the path to the configuration file. Module expects `pytorch`, `numpy`, and `pandas`
+to be available in the environment.
 
 ```bash
 $ run_octopus.py /path/to/config.txt
 ```
 
-### Configuration File requirements
+## Configuration file requirements
 
 The following is an example of a configuration file. All configs are required. Values are fully customizable.
 
 ```text
 [DEFAULT]
+run_name = Run-07
 
 [debug]
 debug_file = /Users/ryanqnelson/Desktop/test/debug.log
@@ -80,13 +98,14 @@ debug_file = /Users/ryanqnelson/Desktop/test/debug.log
 [kaggle]
 download_from_kaggle = True
 kaggle_dir = /Users/ryanqnelson/Desktop/test/.kaggle
-token_file = /Users/ryanqnelson/Desktop/test/kaggle.json
+content_dir = /Users/ryanqnelson/Desktop/test/content/
+token_file = /Users/ryanqnelson/Desktop/kaggle.json
 competition = hw1p2-toy-problem
 delete_zipfiles_after_unzipping = True
 
 [wandb]
+wandb_dir = /Users/ryanqnelson/Desktop/test
 entity = ryanquinnnelson
-name = Run-02
 project = CMU-11685-HW1P2-octopus-4
 notes = Simple MLP
 tags = MLP,octopus
@@ -105,13 +124,15 @@ comparison_patience=20
 val_metric_name=val_acc
 
 [data]
-data_dir = /Users/ryanqnelson/Desktop/test/content
+data_dir = /Users/ryanqnelson/Desktop/test/content/competitions/hw1p2-toy-problem
 output_dir = /Users/ryanqnelson/Desktop/test/output
 train_data_file=toy_train_data.npy
 train_label_file=toy_train_label.npy
 val_data_file=toy_val_data.npy
 val_label_file=toy_val_label.npy
 test_data_file=toy_test_data.npy
+
+# input is (2 * context + 1) * 40 for this dataset
 input_size=200
 output_size=71
 
@@ -133,7 +154,7 @@ dataloader_batch_size=128
 
 # keyword arguments to be supplied to Dataset subclasses when loading data
 dataset_kwargs=context=2
-num_epochs = 30
+num_epochs = 3
 hidden_layer_sizes = 128
 dropout_rate=0.0
 batch_norm=False
@@ -181,7 +202,12 @@ $ mount_drive.sh
 - weight initializations
     - Current: model uses default initializations
     - Improvement: implement Kaiming Initialization or Xavier Initialization
-
+- Ability to turn off wandb
+    - Current: there is no way to turn off the service because many parts of `octopus` use wandb.
+    - Improvement: a single change in the config file stops use of wandb throughout the pipeline.
+- mount script arguments
+    - Current: mount script assumes the name of the drive to mount.
+    - Improvement: we pass in the name of the drive to mount as an argument to the script.
 
 
 
