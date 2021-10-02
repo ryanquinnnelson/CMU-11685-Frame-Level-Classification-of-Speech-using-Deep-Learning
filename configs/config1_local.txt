@@ -1,4 +1,5 @@
 [DEFAULT]
+run_name = Run-07
 
 [debug]
 debug_file = /Users/ryanqnelson/Desktop/test/debug.log
@@ -6,13 +7,13 @@ debug_file = /Users/ryanqnelson/Desktop/test/debug.log
 [kaggle]
 download_from_kaggle = True
 kaggle_dir = /Users/ryanqnelson/Desktop/test/.kaggle
-token_file = /Users/ryanqnelson/Desktop/test/kaggle.json
+content_dir = /Users/ryanqnelson/Desktop/test/content/
+token_file = /Users/ryanqnelson/Desktop/kaggle.json
 competition = hw1p2-toy-problem
 delete_zipfiles_after_unzipping = True
 
 [wandb]
 entity = ryanquinnnelson
-name = Run-07
 project = CMU-11685-HW1P2-octopus-4
 notes = Simple MLP
 tags = MLP,octopus
@@ -31,7 +32,7 @@ comparison_patience=20
 val_metric_name=val_acc
 
 [data]
-data_dir = /Users/ryanqnelson/Desktop/test/content
+data_dir = /Users/ryanqnelson/Desktop/test/content/competitions/hw1p2-toy-problem
 output_dir = /Users/ryanqnelson/Desktop/test/output
 train_data_file=toy_train_data.npy
 train_label_file=toy_train_label.npy
@@ -61,7 +62,7 @@ dataloader_batch_size=128
 
 # keyword arguments to be supplied to Dataset subclasses when loading data
 dataset_kwargs=context=2
-num_epochs = 30
+num_epochs = 3
 hidden_layer_sizes = 128
 dropout_rate=0.0
 batch_norm=False

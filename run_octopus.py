@@ -16,10 +16,10 @@ def main():
 
     # run octopus
     octopus = Octopus(config)
-    octopus.setup_environment()
-    octopus.download_data()
-    octopus.run_pipeline()
-    octopus.cleanup()
+    # octopus.setup_environment()
+    # octopus.download_data()
+    # octopus.run_pipeline()
+    # octopus.cleanup()
 
 
 if __name__ == "__main__":

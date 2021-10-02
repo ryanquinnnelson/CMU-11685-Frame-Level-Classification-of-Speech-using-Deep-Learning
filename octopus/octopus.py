@@ -227,10 +227,16 @@ def _to_string_list(s):
 
 
 def _setup_logging(debug_file):
-    if os.path.isfile(debug_file):
-        os.remove(debug_file)  # delete older debug file if it exists
+    # create directory if it doesn't exist
+    debug_path = os.path.dirname(debug_file)
+    if not os.path.isdir(debug_path):
+        os.mkdir(debug_path)
 
-    # write to both debug file and stdout
+    # delete older debug file if it exists
+    if os.path.isfile(debug_file):
+        os.remove(debug_file)
+
+        # write to both debug file and stdout
     # https://youtrack.jetbrains.com/issue/PY-39762
     # noinspection PyArgumentList
     logging.basicConfig(level=logging.INFO,

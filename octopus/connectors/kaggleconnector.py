@@ -9,6 +9,8 @@ import json
 import glob
 import zipfile
 
+import octopus.utilities.utilities as utilities
+
 
 class KaggleConnector:
 
@@ -83,18 +85,20 @@ def _mkdirs(kaggle_dir, content_dir):
     logging.info('Setting up kaggle directories...')
 
     # kaggle directory
-    if not os.path.isdir(kaggle_dir):
-        logging.info(f'Making kaggle directory:{kaggle_dir}...')
-        os.mkdir(kaggle_dir)
-    else:
-        logging.info(f'kaggle directory already exists:{kaggle_dir}.')
+    utilities.create_directory(kaggle_dir)
+    # if not os.path.isdir(kaggle_dir):
+    #     logging.info(f'Making kaggle directory:{kaggle_dir}...')
+    #     os.mkdir(kaggle_dir)
+    # else:
+    #     logging.info(f'kaggle directory already exists:{kaggle_dir}.')
 
     # kaggle content directory
-    if not os.path.isdir(content_dir):
-        logging.info(f'Making kaggle content directory:{content_dir}...')
-        os.mkdir(content_dir)
-    else:
-        logging.info(f'kaggle content directory already exists:{content_dir}.')
+    utilities.create_directory(content_dir)
+    # if not os.path.isdir(content_dir):
+    #     logging.info(f'Making kaggle content directory:{content_dir}...')
+    #     os.mkdir(content_dir)
+    # else:
+    #     logging.info(f'kaggle content directory already exists:{content_dir}.')
 
 
 def _read_kaggle_token(token_file):
