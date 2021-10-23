@@ -1,6 +1,8 @@
 """
-Defines all standard models that Octopus can generate.
+Defines all standard MLP models that Octopus can generate.
 """
+
+__author__ = 'ryanquinnnelson'
 
 import logging
 from collections import OrderedDict

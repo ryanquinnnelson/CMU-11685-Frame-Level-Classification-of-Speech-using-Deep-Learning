@@ -1,14 +1,13 @@
 """
 All things related to training models.
 """
+__author__ = 'ryanquinnnelson'
 
 import logging
 import time
 
 import torch
 import numpy as np
-
-import octopus.handlers.devicehandler as dh
 
 
 def train_model(epoch, num_epochs, train_loader, model, criterion_func, devicehandler, optimizer):
@@ -48,10 +47,13 @@ def train_model(epoch, num_epochs, train_loader, model, criterion_func, deviceha
     return train_loss
 
 
-def evaluate_model(epoch, num_epochs, val_loader, model, loss_func, devicehandler, acc_func):
+
+
+def evaluate_model(epoch, num_epochs, val_loader, model, loss_func, evaluate_batch_func, evaluate_epoch_func,
+                   devicehandler):
     logging.info(f'Running epoch {epoch}/{num_epochs} of evaluation...')
     val_loss = 0
-    hits = 0
+    eval_metric = 0
 
     with torch.no_grad():  # deactivate autograd engine to improve efficiency
 
@@ -72,7 +74,7 @@ def evaluate_model(epoch, num_epochs, val_loader, model, loss_func, devicehandle
 
             # calculate number of accurate predictions for this batch
             out = out.cpu().detach().numpy()  # extract from gpu
-            hits += acc_func(out, targets)
+            eval_metric += evaluate_batch_func(out, targets)
 
             # delete mini-batch from device
             del inputs
@@ -80,9 +82,9 @@ def evaluate_model(epoch, num_epochs, val_loader, model, loss_func, devicehandle
 
         # calculate evaluation metrics
         val_loss /= len(val_loader)  # average per mini-batch
-        val_acc = hits / len(val_loader.dataset)  # global accuracy
+        eval_metric = evaluate_epoch_func(eval_metric, len(val_loader), len(val_loader.dataset))
 
-        return val_loss, val_acc
+        return val_loss, eval_metric
 
 
 def test_model(epoch, num_epochs, test_loader, model, devicehandler):
@@ -241,7 +243,7 @@ class TrainingHandler:
             self.stats['max_val_acc_epoch'] = epoch
 
     def run_training_epochs(self, train_loader, val_loader, test_loader, model, optimizer, scheduler, loss_func,
-                            acc_func, conversion_func,
+                            evaluate_batch_func, evaluate_epoch_func, format_func,
                             datahandler, devicehandler, checkpointhandler, schedulerhandler, wandbconnector):
 
         # load checkpoint if necessary
@@ -257,13 +259,13 @@ class TrainingHandler:
             train_loss = train_model(epoch, self.num_epochs, train_loader, model, loss_func, devicehandler, optimizer)
 
             # validate
-            val_loss, val_acc = evaluate_model(epoch, self.num_epochs, val_loader, model, loss_func, devicehandler,
-                                               acc_func)
+            val_loss, val_acc = evaluate_model(epoch, self.num_epochs, val_loader, model, loss_func,
+                                               evaluate_batch_func, evaluate_epoch_func, devicehandler)
 
             # test
             out = test_model(epoch, self.num_epochs, test_loader, model, devicehandler)
-            out = conversion_func(out)
-            datahandler.save(out, epoch)
+            df = format_func(out)
+            datahandler.save(df, epoch)
 
             # stats
             end = time.time()

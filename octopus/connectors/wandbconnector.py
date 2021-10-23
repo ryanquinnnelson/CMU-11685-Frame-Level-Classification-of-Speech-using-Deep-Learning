@@ -1,14 +1,18 @@
 """
 All things related to wandb.
 """
+__author__ = 'ryanquinnnelson'
+
 import logging
 import subprocess
 
 import pandas as pd
+import octopus.utilities.utilities as utilities
 
 
 class WandbConnector:
-    def __init__(self, entity, run_name, project, notes, tags, config):
+    def __init__(self, wandb_dir, entity, run_name, project, notes, tags, config):
+        self.wandb_dir = wandb_dir
         self.entity = entity
         self.run_name = run_name
         self.project = project
@@ -20,9 +24,25 @@ class WandbConnector:
     def setup(self):
         logging.info('Setting up wandb connector...')
 
+        # ensure wandb_dir exists
+        utilities.create_directory(self.wandb_dir)
+
         _install()
         _login()
-        self.wandb_config = _initialize(self.run_name, self.project, self.notes, self.tags, self.config)
+        self.wandb_config = self._initialize()
+
+    def _initialize(self):
+        logging.info('Initializing wandb...')
+
+        import wandb
+        wandb.init(dir=self.wandb_dir,
+                   name=self.run_name,
+                   project=self.project,
+                   notes=self.notes,
+                   tags=self.tags,
+                   config=self.config)
+
+        return wandb.config
 
     def watch(self, model):
         import wandb
@@ -115,14 +135,4 @@ def _login():
     wandb.login()
 
 
-def _initialize(name, project, notes, tags, config):
-    logging.info('Initializing wandb...')
 
-    import wandb
-    wandb.init(name=name,
-               project=project,
-               notes=notes,
-               tags=tags,
-               config=config)
-
-    return wandb.config

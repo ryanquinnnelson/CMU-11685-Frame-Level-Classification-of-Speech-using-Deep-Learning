@@ -1,6 +1,7 @@
 """
 All things related to model checkpoints.
 """
+__author__ = 'ryanquinnnelson'
 
 import os
 import logging

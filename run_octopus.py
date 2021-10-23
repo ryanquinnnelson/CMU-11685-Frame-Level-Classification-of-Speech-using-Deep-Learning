@@ -1,6 +1,7 @@
 """
 Runs octopus.
 """
+__author__ = 'ryanquinnnelson'
 
 import configparser
 import sys

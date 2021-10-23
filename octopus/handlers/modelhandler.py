@@ -1,6 +1,8 @@
 """
 All things related to models.
 """
+__author__ = 'ryanquinnnelson'
+
 import logging
 
 from octopus.models.MLP import MLP

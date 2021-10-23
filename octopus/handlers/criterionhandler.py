@@ -1,6 +1,8 @@
 """
 All things related to criterion.
 """
+__author__ = 'ryanquinnnelson'
+
 import logging
 
 import torch.nn as nn

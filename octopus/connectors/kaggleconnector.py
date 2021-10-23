@@ -1,6 +1,7 @@
 """
 All things related to kaggle.
 """
+__author__ = 'ryanquinnnelson'
 
 import logging
 import os
@@ -8,6 +9,8 @@ import subprocess
 import json
 import glob
 import zipfile
+
+import octopus.utilities.utilities as utilities
 
 
 class KaggleConnector:
@@ -17,8 +20,8 @@ class KaggleConnector:
         self.content_dir = content_dir
         self.token_file = token_file
         self.competition = competition
-        self.competition_dir = os.path.join(content_dir, 'competitions', competition)
         self.delete_zipfiles = delete_zipfiles
+        self.competition_dir = os.path.join(content_dir, 'competitions', competition)
 
     def setup(self):
         logging.info('Setting up kaggle connector...')
@@ -53,7 +56,7 @@ class KaggleConnector:
         logging.info('Unzipping competition files...')
         # get filenames
         zipfiles = glob.glob(self.competition_dir + '/*.zip')
-
+        logging.info(f'Found the following zipped files:{zipfiles}.')
         # unzip each file
         for f in zipfiles:
             with zipfile.ZipFile(f, 'r') as zip_ref:
@@ -61,9 +64,9 @@ class KaggleConnector:
 
         # clean up original zipfile
         if self.delete_zipfiles:
+            logging.info('Removing zip files after extracting contents...')
             for f in zipfiles:
                 os.remove(f)
-
 
     def download_and_unzip(self):
         self.download()
@@ -83,18 +86,20 @@ def _mkdirs(kaggle_dir, content_dir):
     logging.info('Setting up kaggle directories...')
 
     # kaggle directory
-    if not os.path.isdir(kaggle_dir):
-        logging.info(f'Making kaggle directory:{kaggle_dir}...')
-        os.mkdir(kaggle_dir)
-    else:
-        logging.info(f'kaggle directory already exists:{kaggle_dir}.')
+    utilities.create_directory(kaggle_dir)
+    # if not os.path.isdir(kaggle_dir):
+    #     logging.info(f'Making kaggle directory:{kaggle_dir}...')
+    #     os.mkdir(kaggle_dir)
+    # else:
+    #     logging.info(f'kaggle directory already exists:{kaggle_dir}.')
 
     # kaggle content directory
-    if not os.path.isdir(content_dir):
-        logging.info(f'Making kaggle content directory:{content_dir}...')
-        os.mkdir(content_dir)
-    else:
-        logging.info(f'kaggle content directory already exists:{content_dir}.')
+    utilities.create_directory(content_dir)
+    # if not os.path.isdir(content_dir):
+    #     logging.info(f'Making kaggle content directory:{content_dir}...')
+    #     os.mkdir(content_dir)
+    # else:
+    #     logging.info(f'kaggle content directory already exists:{content_dir}.')
 
 
 def _read_kaggle_token(token_file):
