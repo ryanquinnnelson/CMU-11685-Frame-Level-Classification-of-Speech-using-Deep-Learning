@@ -186,11 +186,11 @@ $ mount_drive.sh
 
 ## Improvement Ideas
 
-- Multiple configuration files
+- ~~Multiple configuration files~~ (Implemented in `octopus` in CMU-11685-HW2P2)
     - Current: `octopus` executes the pipeline for a single configuration file.
     - Improvement: If multiple configuration files are placed into a configuration folder, `octopus` will execute the
       pipeline for each configuration file.
-- wandb checkpoint metrics
+- ~~wandb checkpoint metrics~~ (Implemented in `octopus` in CMU-11685-HW2P2)
     - Current: When loading from checkpoint (and therefore starting from an epoch other than 1), the metrics sent to
       wandb will appear shifted relative to runs that sent metrics from epoch 1. For a previous run, the metric for
       epoch 1 is displayed as position 0 on wandb. For the checkpoint run, the metric for epoch X is displayed as
@@ -199,7 +199,7 @@ $ mount_drive.sh
       graphs. A few ways to do this: (1) If loading from a checkpoint, `octopus` sends dummy metrics to wandb for each
       of the epochs before the one that the pipeline starts on; (2) `octopus` sends the actual metrics from all epochs
       stored in the checkpoint.
-- weight initializations
+- ~~weight initializations~~ (Implemented for Resnet in `octopus` in CMU-11685-HW2P2)
     - Current: model uses default initializations
     - Improvement: implement Kaiming Initialization or Xavier Initialization
 - Ability to turn off wandb
@@ -209,5 +209,17 @@ $ mount_drive.sh
     - Current: mount script assumes the name of the drive to mount.
     - Improvement: we pass in the name of the drive to mount as an argument to the script.
 
+## How octopus is used for this project
 
+We were given a dataset of audio recordings (utterances) and asked to classify each speech frame into one of 71 phoneme
+states. We were given 14542 training utterances (18482968 frames), 2683 validation utterances (1935669 frames), and 2600
+test utterances (1910012 frames). Audio utterances were already preprocessed into raw melspectrograms frames. Utterances
+had a variable number of frames, but every frame had 40 dimensions.
+
+We were asked to implement a multilayer perceptron (MLP) model to classify the frames. One of the important
+hyperparameters to tune was the amount of context provided around each frame. On its own, a single frame doesn't contain
+much information. High accuracy was only achievable by including some number of surrounding frames for context.
+
+I customized the `customized` module for this dataset and formatted output for the kaggle competition. The highest
+accuracy I was able to achieve on the private kaggle leaderboard was 79.704% (rank 17/316).
 
